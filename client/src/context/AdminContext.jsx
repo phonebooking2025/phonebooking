@@ -9,7 +9,7 @@ import axios from "axios";
 import { useAuth } from "./AuthContext";
 
 const AdminContext = createContext();
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://phonebooking.vercel.app/api";
 
 const axiosInstance = axios.create({ baseURL: API_URL });
 axiosInstance.interceptors.request.use(

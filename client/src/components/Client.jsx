@@ -264,11 +264,11 @@ const Client = () => {
   const mobileData =
     preciousItems.filter((p) => p.id).length > 0
       ? preciousItems.filter((p) => p.id)
-      : [samplePreciousItem];
+      : [];
   const homeAppliancesData =
     otherItems.filter((p) => p.id).length > 0
       ? otherItems.filter((p) => p.id)
-      : [sampleOtherItem];
+      : [];
 
   const handleLoginSuccess = useCallback((username) => {
     const updatedUser = getLocalStorageData(STORAGE_KEYS.USER_LOGGED_IN);

@@ -10,7 +10,7 @@ import axios from "axios";
 const AuthContext = createContext(null);
 
 // Using a standard URL as environment variable imports may not be stable in this environment
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://phonebooking.vercel.app/api";
 
 export const useAuth = () => useContext(AuthContext);
 
