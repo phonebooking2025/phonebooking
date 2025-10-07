@@ -331,6 +331,7 @@ const Client = () => {
       const formData = new FormData();
       formData.append('product_id', pendingNetpay.product_id);
       formData.append('user_name', pendingNetpay.name);
+      formData.append('product_name', pendingNetpay.model);
       formData.append('mobile', pendingNetpay.mobile);
       formData.append('address', pendingNetpay.address);
       formData.append('amount', pendingNetpay.amount);
