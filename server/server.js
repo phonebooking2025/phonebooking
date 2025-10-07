@@ -25,31 +25,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = express();
 
 
-const allowedOrigins = [
-  "http://phonebooking.in",
-  "https://phonebooking.in",
-  "https://www.phonebooking.in",
-  "http://www.phonebooking.in",
-  "http://localhost:5173",
-  "https://phonebooking-client.vercel.app",
-];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-      console.log("Not allowed by CORS:");
-
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-access-token"],
-  credentials: true
-}));
-
-app.options("*", cors());
+// Allowed Multiple Origins 
+const allowedOrigins = ["http://localhost:5173", "https://phonebooking.in", "https://phonebooking-client.vercel.app"];
+app.use(cors({ origin: allowedOrigins, credentials: true }))
 
 app.use(express.json({ limit: "50mb" }));
 
