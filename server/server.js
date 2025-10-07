@@ -25,7 +25,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = express();
 
 app.use(cors({
-  origin: ["http://phonebooking.in", "https://phonebooking.in", "*"],
+  origin: ["http://phonebooking.in", "https://phonebooking.in", "phonebooking.in", , "www.phonebooking.in", "*"],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-access-token"],
   credentials: false
