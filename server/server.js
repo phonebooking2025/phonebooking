@@ -24,13 +24,33 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const app = express();
 
+
+const allowedOrigins = [
+  "http://phonebooking.in",
+  "https://phonebooking.in",
+  "https://www.phonebooking.in",
+  "http://www.phonebooking.in",
+  "http://localhost:5173",
+  "https://phonebooking-client.vercel.app",
+];
+
 app.use(cors({
-  origin: ["http://phonebooking.in", "https://phonebooking.in", "phonebooking.in", , "www.phonebooking.in", "*"],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+      console.log("Not allowed by CORS:");
+
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-access-token"],
-  credentials: false
+  credentials: true
 }));
-app.options('*', cors());
+
+app.options("*", cors());
+
 app.use(express.json({ limit: "50mb" }));
 
 const storage = multer.memoryStorage();
