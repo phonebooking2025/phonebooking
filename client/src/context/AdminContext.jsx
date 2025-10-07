@@ -6,12 +6,11 @@ import React, {
   useCallback,
 } from "react";
 import axios from "axios";
-import { useAuth } from "./AuthContext"; // Assuming AuthContext.js is in the same directory
+import { useAuth } from "./AuthContext";
 
 const AdminContext = createContext();
-const API_URL = "http://localhost:3000/api"; // Use the server's running port
+const API_URL = "http://localhost:3000/api";
 
-// --- Axios Instance with Interceptor ---
 const axiosInstance = axios.create({ baseURL: API_URL });
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -22,10 +21,8 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// --- Hook for easy access ---
 export const useAdminData = () => useContext(AdminContext);
 
-// --- Admin Data Provider Component ---
 export const AdminDataProvider = ({ children }) => {
   const auth = useAuth();
   if (!auth)
@@ -94,7 +91,6 @@ export const AdminDataProvider = ({ children }) => {
     deliveryImageFile: null,
   });
 
-  // --- FETCH ALL DATA ---
   const fetchAllData = useCallback(async () => {
     if (!isAuthenticated || !user?.is_admin) {
       setLoading(false);
@@ -109,7 +105,7 @@ export const AdminDataProvider = ({ children }) => {
           axiosInstance.get("/products/precious"),
           axiosInstance.get("/products/other"),
           axiosInstance.get("/admin/orders"),
-          axiosInstance.get("/admin/messages/latest-per-user"), // <-- NEW API
+          axiosInstance.get("/admin/messages/latest-per-user"),
           axiosInstance.get("/settings"),
         ]);
 
@@ -124,7 +120,6 @@ export const AdminDataProvider = ({ children }) => {
         deliveryImageFile: prev.deliveryImageFile,
       }));
 
-      // Use the absolute latest message across all users
       const latestMessagesArray = messagesRes.data?.latestMessages || [];
       let latestMessage = null;
       if (latestMessagesArray.length > 0) {
@@ -158,7 +153,6 @@ export const AdminDataProvider = ({ children }) => {
     }
   }, [isAuthenticated, user, fetchAllData]);
 
-  // --- PRODUCT HANDLERS ---
   const handleProductChange = (index, field, value, category) => {
     const setter = category === "precious" ? setPreciousItems : setOtherItems;
     setter((prev) => {
@@ -207,7 +201,6 @@ export const AdminDataProvider = ({ children }) => {
     }
   };
 
-  // --- SETTINGS HANDLERS ---
   const handleSettingsChange = (field, value) =>
     setSettings((prev) => ({ ...prev, [field]: value }));
 
@@ -236,7 +229,6 @@ export const AdminDataProvider = ({ children }) => {
       banners: prev.banners.filter((_, i) => i !== index),
     }));
 
-  // --- ORDER & MESSAGE HANDLERS ---
   const confirmNetpayDelivery = async (orderId) => {
     setLoading(true);
     try {
@@ -292,9 +284,7 @@ export const AdminDataProvider = ({ children }) => {
     }
   };
 
-  // Client-side React component (Corrected state setter)
-
-  const [userMessages, setUserMessages] = useState([]); // Corrected to use userMessages
+  const [userMessages, setUserMessages] = useState([]);
   const [latestAdminMessage, setLatestAdminMessage] = useState(null);
 
   const fetchMessagesForUser = async () => {
@@ -329,11 +319,9 @@ export const AdminDataProvider = ({ children }) => {
     }
   };
 
-  // --- SAVE ALL CHANGES ---
   const saveAllChanges = async () => {
     setLoading(true);
     try {
-      // 1️⃣ SETTINGS
       const settingsFormData = new FormData();
       settingsFormData.append("id", settings.id || "");
       settingsFormData.append("header_title", settings.headerTitle || "");
@@ -357,7 +345,6 @@ export const AdminDataProvider = ({ children }) => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // 2️⃣ PRODUCTS
       const allItems = [...preciousItems, ...otherItems];
       const toNumberOrNull = (val) => {
         if (val === "" || val === null || val === undefined) return null;

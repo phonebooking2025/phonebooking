@@ -23,7 +23,14 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: ["http://phonebooking.in", "https://phonebooking.in", "*"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-access-token"],
+  credentials: false
+}));
+app.options('*', cors());
 app.use(express.json({ limit: "50mb" }));
 
 const storage = multer.memoryStorage();

@@ -63,44 +63,9 @@ const getOfferEndTime = (offerTime) => {
   return todayEndTime;
 };
 
-// --- Sample Data (Used as fallback if AdminContext is empty) ---
-const samplePreciousItem = {
-  id: "Nokia61_PCB_64GB",
-  model: "Nokia 6.1 Motherboard (4GB/64GB)",
-  image: nokie,
-  price: 5000,
-  netpayPrice: 4199,
-  bookingAmount: 4599,
-  offer: 16,
-  offerTime: "18:00",
-  fullSpecs:
-    "SoC: Qualcomm Snapdragon 630 (14nm). RAM: 4GB LPDDR4. Storage: 64GB eMMC 5.1. Model: TA-1068. Tested 100% working condition.",
-  netpayQrCode:
-    "https://placehold.co/300x300/4F46E5/ffffff?text=Netpay+QR+Code+1",
-  inStock: true,
-  stockCount: 15,
-};
-
-const sampleOtherItem = {
-  id: "SamS8_Snap835_64GB",
-  model: "Samsung Galaxy S8 Motherboard (SM-G950U)",
-  image: samsung,
-  price: 9500,
-  netpayPrice: 8499,
-  bookingAmount: 8899,
-  offer: 10,
-  offerTime: "23:59",
-  fullSpecs:
-    "SoC: Snapdragon 835 (10nm). RAM: 4GB LPDDR4X. Storage: 64GB UFS 2.1. Unlocked with original IMEI. 30-day warranty.",
-  netpayQrCode:
-    "https://placehold.co/300x300/F97316/ffffff?text=Netpay+QR+Code+2",
-  inStock: true,
-  stockCount: 8,
-};
-
 // --- Axios Setup: Instance with Interceptor for JWT ---
 // IMPORTANT: Replace with your actual API endpoint if different from the default
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://phonebooking.vercel.app/api";
 const axiosInstance = axios.create({ baseURL: API_URL });
 
 // Function to get the token (used in axios interceptor and confirmation logic)
@@ -649,7 +614,7 @@ const Client = () => {
   // Loader Animation
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 3000);
+    const timer = setTimeout(() => setLoading(false), 2000);
     return () => clearTimeout(timer);
   }, []);
   if (loading) return <Loading />;
