@@ -82,72 +82,119 @@ const LoginComponent = ({ onLoginSuccess, onModalClose }) => {
   const [isLoginView, setIsLoginView] = useState(true);
   const [loginMobile, setLoginMobile] = useState('');
   const [username, setUserName] = useState('');
-  const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const toggleView = () => setIsLoginView(prev => !prev);
+  const toggleView = () => {
+    setIsLoginView(prev => !prev)
+  };
 
   const handleAuth = async () => {
-    if (!loginMobile || !password || (!isLoginView && !phone)) {
-      toast.error('Please fill all the required fields.');
-      return;
+    // Basic validation
+    if (isLoginView) {
+      if (!loginMobile || !password) {
+        toast.error("Please fill Mobile and Password to login.");
+        return;
+      }
+    } else {
+      if (!username || !phone || !password) {
+        toast.error("Please fill Username, Mobile, and Password to signup.");
+        return;
+      }
     }
 
     setLoading(true);
-
     try {
       if (isLoginView) {
-        // API Login
-        const response = await axiosInstance.post('/auth/login', { loginMobile, password });
-        const { token, user } = response.data;
+        // Login API call
+        const res = await axiosInstance.post('/auth/login', { loginMobile, password });
+        const { user, token } = res.data;
         setLocalStorageData(STORAGE_KEYS.USER_LOGGED_IN, { ...user, token, timestamp: Date.now() });
-        onLoginSuccess(user.username);
         toast.success('Login successful!');
-
-      } else {
-        // API Signup
-        const response = await axiosInstance.post('/auth/signup', { username, password, phone });
-        const { token, user } = response.data;
-        setLocalStorageData(STORAGE_KEYS.USER_LOGGED_IN, { ...user, token, timestamp: Date.now() });
         onLoginSuccess(user.username);
-        toast.success('Account created.');
+      } else {
+        // Signup API call
+        const res = await axiosInstance.post('/auth/signup', { username, phone, password });
+        const { user, token } = res.data;
+        setLocalStorageData(STORAGE_KEYS.USER_LOGGED_IN, { ...user, token, timestamp: Date.now() });
+        toast.success('Account created successfully!');
+        onLoginSuccess(user.username);
       }
+
       onModalClose();
-    } catch (error) {
-      const message = error.response?.data?.message || `Authentication failed. ${isLoginView ? 'Check credentials.' : 'Try a different username.'}`;
-      toast.error(message);
+
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Authentication failed. Please try again.';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="login-modal-content">
       <h3>{isLoginView ? 'Login' : 'Signup'}</h3>
-      <div className="form-group">
-        <label htmlFor="auth-username">Mobile:</label>
-        <input type="text" id="auth-username" value={loginMobile} onChange={(e) => setLoginMobile(e.target.value)} />
-      </div>
-      {!isLoginView && (
+
+      {isLoginView ? (
         <div className="form-group">
-          <label htmlFor="auth-phone">Phone:</label>
-          <input type="text" id="auth-phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <label htmlFor="login-mobile">Mobile:</label>
+          <input
+            type="text"
+            id="login-mobile"
+            value={loginMobile}
+            onChange={(e) => setLoginMobile(e.target.value)}
+            placeholder="Enter your mobile number"
+          />
         </div>
+      ) : (
+        <>
+          <div className="form-group">
+            <label htmlFor="signup-username">Username:</label>
+            <input
+              type="text"
+              id="signup-username"
+              value={username}
+              onChange={(e) => setUserName(e.target.value)}
+              placeholder="Choose a username"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="signup-phone">Mobile:</label>
+            <input
+              type="text"
+              id="signup-phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Enter your mobile number"
+            />
+          </div>
+        </>
       )}
+
       <div className="form-group">
         <label htmlFor="auth-password">Password:</label>
-        <input type="password" id="auth-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <input
+          type="password"
+          id="auth-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password"
+        />
       </div>
-      <button onClick={handleAuth} disabled={loading} style={{ marginRight: '10px' }}>
-        {loading ? 'Processing...' : (isLoginView ? 'Login' : 'Signup')}
-      </button>
-      <button onClick={onModalClose} disabled={loading}>Close</button>
+
+      <div className="button-group">
+        <button onClick={handleAuth} disabled={loading}>
+          {loading ? 'Processing...' : isLoginView ? 'Login' : 'Signup'}
+        </button>
+        <button onClick={onModalClose} disabled={loading}>Close</button>
+      </div>
+
       <p style={{ marginTop: '15px' }}>
-        {isLoginView ?
-          (<>Don't have an account? <span onClick={toggleView} style={{ color: 'blue', cursor: 'pointer', fontWeight: 'bold' }}>Create Account</span></>) :
-          (<>Already have an account? <span onClick={toggleView} style={{ color: 'blue', cursor: 'pointer', fontWeight: 'bold' }}>Login</span></>)
-        }
+        {isLoginView ? (
+          <>Don't have an account? <span onClick={toggleView} style={{ color: 'blue', cursor: 'pointer', fontWeight: 'bold' }}>Create Account</span></>
+        ) : (
+          <>Already have an account? <span onClick={toggleView} style={{ color: 'blue', cursor: 'pointer', fontWeight: 'bold' }}>Login</span></>
+        )}
       </p>
     </div>
   );
