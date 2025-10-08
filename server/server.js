@@ -45,7 +45,7 @@ const uploadToCloudinary = (fileBuffer, folder) => {
 };
 
 const signToken = (payload) =>
-  jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
+  jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -353,6 +353,22 @@ app.get("/api/admin/orders", verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
+app.get("/api/public/orders", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*, address, product:product_id(model)")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Fetch orders failed", details: err.message });
+  }
+});
+
 app.put(
   "/api/admin/orders/:id/confirm",
   verifyToken,
@@ -387,6 +403,21 @@ app.get("/api/user/sales/count", verifyToken, async (req, res) => {
       .select("id", { head: true, count: "exact" })
       .eq("user_id", req.user.id)
       .eq("delivery_status", "Confirmed");
+    if (error) throw error;
+    res.json({ total_sales_count: count || 0 });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Fetch sales count failed", details: err.message });
+  }
+});
+
+// Public API 
+app.get("/api/count", async (req, res) => {
+  try {
+    const { count, error } = await supabase
+      .from("orders")
+      .select("id", { head: true, count: "exact" });
     if (error) throw error;
     res.json({ total_sales_count: count || 0 });
   } catch (err) {
@@ -492,6 +523,8 @@ app.get("/api/settings", async (req, res) => {
       .json({ message: "Fetch settings failed", details: err.message });
   }
 });
+
+
 
 app.post("/api/messages/send", verifyToken, async (req, res) => {
   try {

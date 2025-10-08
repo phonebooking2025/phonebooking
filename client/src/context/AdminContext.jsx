@@ -1,28 +1,31 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useAuth } from './AuthContext'; // Assuming AuthContext.js is in the same directory
+import { useAuth } from './AuthContext';
 
 const AdminContext = createContext();
-const API_URL = 'https://phonebooking.vercel.app/api'; // Use the server's running port
+const API_URL = 'https://phonebooking.vercel.app/api';
 
-// --- Axios Instance with Interceptor ---
+// --- Axios Instance ---
 const axiosInstance = axios.create({ baseURL: API_URL });
-axiosInstance.interceptors.request.use(config => {
-    const token = localStorage.getItem('adminToken');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-}, error => Promise.reject(error));
+axiosInstance.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('adminToken');
+        if (token) config.headers.Authorization = `Bearer ${token}`;
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
-// --- Hook for easy access ---
 export const useAdminData = () => useContext(AdminContext);
 
-// --- Admin Data Provider Component ---
+// ------------------ AdminDataProvider ------------------
 export const AdminDataProvider = ({ children }) => {
     const auth = useAuth();
     if (!auth) throw new Error("AdminDataProvider must be wrapped inside AuthProvider.");
 
     const { isAuthenticated, user, logout } = auth;
 
+    // --- STATE ---
     const [preciousItems, setPreciousItems] = useState([]);
     const [otherItems, setOtherItems] = useState([]);
     const [netpaySales, setNetpaySales] = useState([]);
@@ -40,6 +43,7 @@ export const AdminDataProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // ------------------ Mappers ------------------
     const mapProductFromDb = (p) => ({
         id: p.id,
         category: p.category,
@@ -80,21 +84,17 @@ export const AdminDataProvider = ({ children }) => {
         deliveryImageFile: null
     });
 
-    // --- FETCH ALL DATA ---
-    const fetchAllData = useCallback(async () => {
-        if (!isAuthenticated || !user?.is_admin) {
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true); setError(null);
+    // ------------------ PUBLIC DATA ------------------
+    const fetchPublicData = useCallback(async () => {
         try {
-            const [preciousRes, otherRes, salesRes, messagesRes, settingsRes] = await Promise.all([
+            setLoading(true);
+
+            const [preciousRes, otherRes, salesRes, settingsRes, messagesRes,] = await Promise.all([
                 axiosInstance.get('/products/precious'),
                 axiosInstance.get('/products/other'),
-                axiosInstance.get('/admin/orders'),
-                axiosInstance.get('/admin/messages/latest-per-user'), // <-- NEW API
-                axiosInstance.get('/settings')
+                axiosInstance.get('/public/orders'),
+                axiosInstance.get('/settings'),
+                axiosInstance.get('/public/orders'),
             ]);
 
             setPreciousItems((preciousRes.data || []).map(mapProductFromDb));
@@ -102,46 +102,89 @@ export const AdminDataProvider = ({ children }) => {
             setNetpaySales((salesRes.data || []).map(mapOrderFromDb));
 
             const fetchedSettings = mapSettingsFromDb(settingsRes.data || {});
-            setSettings(prev => ({
-                ...fetchedSettings,
-                companyLogoFile: prev.companyLogoFile,
-                deliveryImageFile: prev.deliveryImageFile
-            }));
+            setSettings(fetchedSettings);
 
-            // Use the absolute latest message across all users
+            // Corrected latest message mapping
             const latestMessagesArray = messagesRes.data?.latestMessages || [];
-            let latestMessage = null;
             if (latestMessagesArray.length > 0) {
-                latestMessage = latestMessagesArray.reduce((prev, current) => {
-                    return new Date(prev.created_at) > new Date(current.created_at) ? prev : current;
+                const latestMessage = latestMessagesArray.reduce((prev, current) =>
+                    new Date(prev.created_at) > new Date(current.created_at) ? prev : current
+                );
+                setLatestUserMessage({
+                    content: latestMessage?.content || 'No messages from users.',
+                    userId: latestMessage?.user_id || null
                 });
+            } else {
+                setLatestUserMessage({ content: 'No messages found.', userId: null });
             }
 
-            setLatestUserMessage({
-                content: latestMessage?.content || 'No messages from users.',
-                userId: latestMessage?.user_id || null
-            });
-
+            setError(null);
         } catch (err) {
-            console.error('Fetch error:', err);
+            console.error("Public data fetch error:", err);
+            setError("Failed to load public data");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Public Fetch 
+    useEffect(() => {
+        fetchPublicData();
+    }, []);
+
+    // ------------------ ADMIN DATA ------------------
+    const fetchAdminData = useCallback(async () => {
+        if (!isAuthenticated || !user?.is_admin) {
+            await fetchPublicData();
+            return;
+        }
+        setLoading(true);
+        try {
+            const [preciousRes, otherRes, salesRes, messagesRes, settingsRes] = await Promise.all([
+                axiosInstance.get('/products/precious'),
+                axiosInstance.get('/products/other'),
+                axiosInstance.get('/admin/orders'),
+                axiosInstance.get('/admin/messages/latest-per-user'),
+                axiosInstance.get('/settings'),
+            ]);
+
+            setPreciousItems((preciousRes.data || []).map(mapProductFromDb));
+            setOtherItems((otherRes.data || []).map(mapProductFromDb));
+            setNetpaySales((salesRes.data || []).map(mapOrderFromDb));
+
+            const fetchedSettings = mapSettingsFromDb(settingsRes.data || {});
+            setSettings(fetchedSettings);
+
+            const latestMessagesArray = messagesRes.data?.latestMessages || [];
+            if (latestMessagesArray.length > 0) {
+                const latestMessage = latestMessagesArray.reduce((prev, current) =>
+                    new Date(prev.created_at) > new Date(current.created_at) ? prev : current
+                );
+                setLatestUserMessage({
+                    content: latestMessage?.content || 'No messages from users.',
+                    userId: latestMessage?.user_id || null
+                });
+            } else {
+                setLatestUserMessage({ content: 'No messages found.', userId: null });
+            }
+
+            setError(null);
+        } catch (err) {
+            console.error('Admin fetch error:', err);
             if (err.response?.status === 401) logout();
             else setError(err.response?.data?.message || err.message);
         } finally {
             setLoading(false);
         }
-    }, [isAuthenticated, user, logout]);
+    }, [isAuthenticated, user, logout, fetchPublicData]);
 
+    // ------------------ INIT ------------------
     useEffect(() => {
-        if (isAuthenticated && user?.is_admin) fetchAllData();
-        else {
-            setLoading(false);
-            setPreciousItems([]);
-            setOtherItems([]);
-            setNetpaySales([]);
-        }
-    }, [isAuthenticated, user, fetchAllData]);
+        if (isAuthenticated && user?.is_admin) fetchAdminData();
+        else fetchPublicData();
+    }, [isAuthenticated, user, fetchAdminData, fetchPublicData]);
 
-    // --- PRODUCT HANDLERS ---
+    // ------------------ PRODUCT HANDLERS ------------------
     const handleProductChange = (index, field, value, category) => {
         const setter = category === 'precious' ? setPreciousItems : setOtherItems;
         setter(prev => {
@@ -173,22 +216,22 @@ export const AdminDataProvider = ({ children }) => {
     const deleteProduct = async (id, index, category) => {
         const setter = category === 'precious' ? setPreciousItems : setOtherItems;
         setLoading(true);
-        if (id) {
-            try {
+        try {
+            if (id) {
                 await axiosInstance.delete(`/admin/products/${id}`);
-                await fetchAllData();
-            } catch (err) {
-                console.error('Delete product error:', err);
-                setError(err.response?.data?.message || err.message);
-                setLoading(false);
+                await fetchAdminData();
+            } else {
+                setter(prev => prev.filter((_, i) => i !== index));
             }
-        } else {
-            setter(prev => prev.filter((_, i) => i !== index));
+        } catch (err) {
+            console.error('Delete product error:', err);
+            setError(err.response?.data?.message || err.message);
+        } finally {
             setLoading(false);
         }
     };
 
-    // --- SETTINGS HANDLERS ---
+    // ------------------ SETTINGS HANDLERS ------------------
     const handleSettingsChange = (field, value) => setSettings(prev => ({ ...prev, [field]: value }));
 
     const handleBannerFileChange = (index, file) => setSettings(prev => {
@@ -199,20 +242,23 @@ export const AdminDataProvider = ({ children }) => {
     });
 
     const addBannerInput = () => {
-        if (settings.banners.length < 5) setSettings(prev => ({ ...prev, banners: [...prev.banners, { path: '', newFile: null }] }));
+        if (settings.banners.length < 5)
+            setSettings(prev => ({ ...prev, banners: [...prev.banners, { path: '', newFile: null }] }));
     };
 
-    const deleteBanner = (index) => setSettings(prev => ({ ...prev, banners: prev.banners.filter((_, i) => i !== index) }));
+    const deleteBanner = (index) =>
+        setSettings(prev => ({ ...prev, banners: prev.banners.filter((_, i) => i !== index) }));
 
-    // --- ORDER & MESSAGE HANDLERS ---
+    // ------------------ ADMIN ACTIONS ------------------
     const confirmNetpayDelivery = async (orderId) => {
         setLoading(true);
         try {
             await axiosInstance.put(`/admin/orders/${orderId}/confirm`);
-            await fetchAllData();
+            await fetchAdminData();
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || err.message);
+        } finally {
             setLoading(false);
         }
     };
@@ -225,19 +271,20 @@ export const AdminDataProvider = ({ children }) => {
         try {
             await axiosInstance.post(`/admin/messages/reply/${targetUserId}`, { content: adminReplyContent });
             setAdminReplyContent('');
-            await fetchAllData();
+            await fetchAdminData();
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || err.message);
+        } finally {
             setLoading(false);
         }
     };
 
-    // --- SAVE ALL CHANGES ---
+    // ------------------ SAVE ALL CHANGES ------------------
     const saveAllChanges = async () => {
         setLoading(true);
         try {
-            // 1️⃣ SETTINGS
+            // SETTINGS
             const settingsFormData = new FormData();
             settingsFormData.append('id', settings.id || '');
             settingsFormData.append('header_title', settings.headerTitle || '');
@@ -253,7 +300,7 @@ export const AdminDataProvider = ({ children }) => {
 
             await axiosInstance.post('/admin/settings', settingsFormData, { headers: { 'Content-Type': 'multipart/form-data' } });
 
-            // 2️⃣ PRODUCTS
+            // PRODUCTS
             const allItems = [...preciousItems, ...otherItems];
             const toNumberOrNull = (val) => {
                 if (val === '' || val === null || val === undefined) return null;
@@ -273,24 +320,23 @@ export const AdminDataProvider = ({ children }) => {
                 formData.append('offer', toNumberOrNull(item.offer));
                 formData.append('offerTime', item.offerTime || '');
                 formData.append('fullSpecs', item.fullSpecs || '');
-                if (item.image && !item.imageFile) formData.append('image', item.image);
-                if (item.netpayQrCode && !item.netpayQrCodeFile) formData.append('netpayQrCode', item.netpayQrCode);
                 if (item.imageFile) formData.append('imageFile', item.imageFile);
                 if (item.netpayQrCodeFile) formData.append('netpayQrCodeFile', item.netpayQrCodeFile);
                 await axiosInstance.post('/admin/products', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             }
 
-            await fetchAllData();
-            alert('All changes saved successfully!');
+            await fetchAdminData();
+            alert('✅ All changes saved successfully!');
         } catch (err) {
-            console.error('Save all changes error:', err.response?.data?.details || err.message);
+            console.error('Save all error:', err);
             setError(err.response?.data?.details || err.message);
-            alert(`Error saving changes: ${err.response?.data?.details || err.message}`);
+            alert(`Error: ${err.response?.data?.details || err.message}`);
         } finally {
             setLoading(false);
         }
     };
 
+    // ------------------ CONTEXT VALUE ------------------
     const contextValue = {
         preciousItems,
         otherItems,
@@ -310,12 +356,10 @@ export const AdminDataProvider = ({ children }) => {
         deleteBanner,
         confirmNetpayDelivery,
         sendSmsToUser,
-        saveAllChanges
+        saveAllChanges,
+        fetchAdminData,
+        fetchPublicData
     };
 
-    return (
-        <AdminContext.Provider value={contextValue}>
-            {children}
-        </AdminContext.Provider>
-    );
+    return <AdminContext.Provider value={contextValue}>{children}</AdminContext.Provider>;
 };
