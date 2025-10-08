@@ -3,12 +3,15 @@ import React, { useState } from 'react';
 import { useAdminData, AdminDataProvider } from '../context/AdminContext';
 import { useAuth, AuthProvider } from '../context/AuthContext';
 import Loading from './Loading'; // <- new Loading component
+import { useNavigate } from 'react-router-dom';
 
 // --- ADMIN LOGIN FORM COMPONENT ---
 const AdminLoginForm = () => {
     const { login, loginError, loading } = useAuth();
     const [mobile, setMobile] = useState('');
     const [password, setPassword] = useState('');
+
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -24,6 +27,7 @@ const AdminLoginForm = () => {
             borderRadius: '10px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
         }}>
+            <p className="home" style={{ fontSize: '12px', padding: '4px 6px', width: '80px', textAlign: 'center', backgroundColor: '#28a745', color: 'white', borderRadius: '5px', cursor: 'pointer' }} onClick={() => navigate("/")}>Home Page</p>
             <h2 style={{ textAlign: 'center', color: '#264D59' }}>Admin Login</h2>
             <form onSubmit={handleSubmit}>
                 {loginError && <p style={{ color: 'red', textAlign: 'center' }}>{loginError}</p>}
@@ -49,6 +53,7 @@ const AdminLoginForm = () => {
                         style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', boxSizing: 'border-box' }}
                     />
                 </div>
+
 
                 <button
                     type="submit"
@@ -129,13 +134,23 @@ const AdminContent = () => {
                 .header-actions button { margin-left: 10px; background-color: #264D59; color: white; border-radius: 5px; padding: 8px 15px; border: none; cursor: pointer; }
                 .header-actions button:hover { background-color: #3e7b8c; }
                 .banner-item{display:block; gap:2px}
+                .home{ padding:10px 15px; background-color:#28a745; color:white; border-radius:5px; text-align:center; font-weight:bold; cursor:pointer; }
             `}</style>
 
             <div className="container">
-                <div className="header-actions">
-                    <button onClick={logout}>Logout</button>
+                <div className="header-actions" style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                }}>
+                    <button style={{ fontSize: "14px", border: "none", padding: '5px 6px', width: '120px', textAlign: 'center', backgroundColor: '#FFC107', color: 'white', borderRadius: '5px', cursor: 'pointer' }} onClick={() => navigate("/")}>Home Page</button>
+                    <button style={{ fontSize: "14px", border: "none", padding: '5px 6px', width: '120px', textAlign: 'center', backgroundColor: '#dc3545', color: 'white', borderRadius: '5px', cursor: 'pointer' }} onClick={logout}>Logout</button>
                 </div>
-                <h1>Admin Panel</h1>
+
+                <h1 style={{ color: '#2D9966' }}>Admin Panel</h1>
+
 
                 {/* --- 1. Website Customization --- */}
                 <div className="form-section">
@@ -302,6 +317,7 @@ const AdminContent = () => {
                 <div className="main-buttons">
                     <button onClick={saveAllChanges}>SAVE ALL CHANGES TO WEBSITE</button>
                 </div>
+
             </div>
         </>
     );

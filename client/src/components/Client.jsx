@@ -638,6 +638,7 @@ const Client = () => {
 
       <div className="email-display">
         <p>For any queries, contact us at: <em>bookingmobile202526@gmail.com</em></p>
+        <button style={{ margin: "5px" }} onClick={() => navigate("/admin")}>Admin Portal</button>
       </div>
     </>
   );
