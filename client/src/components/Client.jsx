@@ -2,13 +2,12 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useAdminData } from '../context/AdminContext';
 import "./Client.css";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import hotToast, { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import Loading from './Loading';
 import { useNavigate } from 'react-router-dom';
+import { FiCheckCircle, FiTruck, FiShield } from "react-icons/fi";
 
-// Define STORAGE_KEYS for localStorage management
+// ==================== STORAGE MANAGEMENT ====================
 const STORAGE_KEYS = {
   NETPAY_SALES: 'user_netpay_sales',
   USER_SMS: 'user_sms_latest',
@@ -20,10 +19,16 @@ const STORAGE_KEYS = {
   USER_ACCOUNTS: 'user_accounts_list'
 };
 
+/**
+ * Store data in localStorage with JSON serialization
+ */
 function setLocalStorageData(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+/**
+ * Retrieve and parse data from localStorage
+ */
 function getLocalStorageData(key) {
   const data = localStorage.getItem(key);
   try {
@@ -34,7 +39,12 @@ function getLocalStorageData(key) {
   }
 }
 
-// Offer Time Calculation Helper
+// ==================== TIME & OFFER UTILITIES ====================
+/**
+ * Calculate offer end time based on offer time string
+ * @param {string} offerTime - Time in HH:MM format
+ * @returns {Date|null} - End time or null if invalid
+ */
 const getOfferEndTime = (offerTime) => {
   if (!offerTime) return null;
   const [hours, minutes] = offerTime.split(':').map(Number);
@@ -48,22 +58,23 @@ const getOfferEndTime = (offerTime) => {
   return todayEndTime;
 };
 
+// ==================== SAMPLE DATA ====================
+const samplePreciousItem = {};
+const sampleOtherItem = {};
 
-const samplePreciousItem = {
-};
-
-const sampleOtherItem = {
-};
-
-
+// ==================== API CONFIGURATION ====================
 const API_URL = 'https://phonebooking.vercel.app/api';
 const axiosInstance = axios.create({ baseURL: API_URL });
 
+/**
+ * Get authentication token from localStorage
+ */
 const getAuthToken = () => {
   const loggedInUser = getLocalStorageData(STORAGE_KEYS.USER_LOGGED_IN);
   return loggedInUser?.token;
 };
 
+// Axios interceptor for adding auth token to requests
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = getAuthToken();
@@ -77,7 +88,11 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// --- Login/Signup Component ---
+
+// ==================== LOGIN COMPONENT ====================
+/**
+ * LoginComponent - Handles user login and signup
+ */
 const LoginComponent = ({ onLoginSuccess, onModalClose }) => {
   const [isLoginView, setIsLoginView] = useState(true);
   const [loginMobile, setLoginMobile] = useState('');
@@ -91,7 +106,7 @@ const LoginComponent = ({ onLoginSuccess, onModalClose }) => {
   };
 
   const handleAuth = async () => {
-    // Basic validation
+    // Validation
     if (isLoginView) {
       if (!loginMobile || !password) {
         toast.error("Please fill Mobile and Password to login.");
@@ -131,12 +146,13 @@ const LoginComponent = ({ onLoginSuccess, onModalClose }) => {
       setLoading(false);
     }
   };
+
   return (
     <div className="login-modal-content">
       <h3>{isLoginView ? 'Login' : 'Signup'}</h3>
 
       {isLoginView ? (
-        <div className="form-group">
+        <div className="login-form-group">
           <label htmlFor="login-mobile">Mobile:</label>
           <input
             type="text"
@@ -148,7 +164,7 @@ const LoginComponent = ({ onLoginSuccess, onModalClose }) => {
         </div>
       ) : (
         <>
-          <div className="form-group">
+          <div className="login-form-group">
             <label htmlFor="signup-username">Username:</label>
             <input
               type="text"
@@ -158,7 +174,7 @@ const LoginComponent = ({ onLoginSuccess, onModalClose }) => {
               placeholder="Choose a username"
             />
           </div>
-          <div className="form-group">
+          <div className="login-form-group">
             <label htmlFor="signup-phone">Mobile:</label>
             <input
               type="text"
@@ -171,7 +187,7 @@ const LoginComponent = ({ onLoginSuccess, onModalClose }) => {
         </>
       )}
 
-      <div className="form-group">
+      <div className="login-form-group">
         <label htmlFor="auth-password">Password:</label>
         <input
           type="password"
@@ -183,24 +199,26 @@ const LoginComponent = ({ onLoginSuccess, onModalClose }) => {
       </div>
 
       <div className="button-group">
-        <button onClick={handleAuth} disabled={loading}>
+        <button onClick={handleAuth} disabled={loading} className="btn-primary">
           {loading ? 'Processing...' : isLoginView ? 'Login' : 'Signup'}
         </button>
-        <button onClick={onModalClose} disabled={loading}>Close</button>
+        <button onClick={onModalClose} disabled={loading} className="btn-secondary">Close</button>
       </div>
 
-      <p style={{ marginTop: '15px' }}>
+      <p className="auth-toggle">
         {isLoginView ? (
-          <>Don't have an account? <span onClick={toggleView} style={{ color: 'blue', cursor: 'pointer', fontWeight: 'bold' }}>Create Account</span></>
+          <>Don't have an account? <span onClick={toggleView} className="toggle-link">Create Account</span></>
         ) : (
-          <>Already have an account? <span onClick={toggleView} style={{ color: 'blue', cursor: 'pointer', fontWeight: 'bold' }}>Login</span></>
+          <>Already have an account? <span onClick={toggleView} className="toggle-link">Login</span></>
         )}
       </p>
     </div>
   );
 };
 
+
 const Client = () => {
+  // ==================== CONTEXT HOOKS ====================
   const {
     preciousItems,
     otherItems,
@@ -211,8 +229,7 @@ const Client = () => {
     fetchPublicData,
   } = useAdminData();
 
-
-  //Fetch public data from AdminContext when Client first loads
+  // ==================== LIFECYCLE - FETCH DATA ====================
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -224,10 +241,7 @@ const Client = () => {
     fetchData();
   }, [fetchPublicData]);
 
-
-
-
-  // Local State Management
+  // ==================== STATE MANAGEMENT ====================
   const [loggedInUser, setLoggedInUser] = useState(getLocalStorageData(STORAGE_KEYS.USER_LOGGED_IN));
   const [isLoggedIn, setIsLoggedIn] = useState(!!loggedInUser);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
@@ -237,17 +251,25 @@ const Client = () => {
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [currentBookingModel, setCurrentBookingModel] = useState(null);
   const [pendingNetpay, setPendingNetpay] = useState(null);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [orderSuccessPopup, setOrderSuccessPopup] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [time, setTime] = useState(new Date());
+
   const [netpayForm, setNetpayForm] = useState({
     name: loggedInUser?.username || '',
     mobile: loggedInUser?.phone || '',
     address: ''
   });
-  const [time, setTime] = useState(new Date());
-  const netpayScreenshotRef = useRef(null);
 
+  const netpayScreenshotRef = useRef(null);
+  const navigate = useNavigate();
+
+  // ==================== DATA PROCESSING ====================
   const mobileData = preciousItems.filter(p => p.id).length > 0 ? preciousItems.filter(p => p.id) : [samplePreciousItem];
   const homeAppliancesData = otherItems.filter(p => p.id).length > 0 ? otherItems.filter(p => p.id) : [sampleOtherItem];
 
+  // ==================== EVENT HANDLERS ====================
   const handleLoginSuccess = useCallback((username) => {
     const updatedUser = getLocalStorageData(STORAGE_KEYS.USER_LOGGED_IN);
     setLoggedInUser(updatedUser);
@@ -264,9 +286,20 @@ const Client = () => {
     setLoggedInUser(null);
     setIsLoggedIn(false);
     setNetpayForm({ name: '', mobile: '', address: '' });
-    toast.info('You have been logged out.', { autoClose: 3000 });
+    toast('You have been logged out.', { icon: 'ℹ️', duration: 3000 });
   };
 
+  const handleNetpayFormChange = (e) => {
+    const { id, value } = e.target;
+    setNetpayForm(prev => ({ ...prev, [id.replace('netpay-user-', '')]: value }));
+  };
+
+  const showPage = (pageId) => {
+    setActivePage(pageId);
+    window.scrollTo(0, 0);
+  };
+
+  // ==================== LIFECYCLE - TIME & BANNER UPDATES ====================
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
@@ -288,24 +321,23 @@ const Client = () => {
     if (banners.length <= 1) setCurrentBannerIndex(0);
   }, [settings.banners]);
 
-  const showPage = (pageId) => {
-    setActivePage(pageId);
-    window.scrollTo(0, 0);
-  };
+  // ==================== LIFECYCLE - LOADER ====================
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const handleNetpayFormChange = (e) => {
-    const { id, value } = e.target;
-    setNetpayForm(prev => ({ ...prev, [id.replace('netpay-user-', '')]: value }));
-  };
+  if (loading) return <Loading />;
 
+  // ==================== SMS FUNCTIONALITY ====================
   const sendSmsToAdmin = async (message, isInternal = false) => {
     if (!isLoggedIn) {
-      if (!isInternal) toast.warn("Login first to send message.", { autoClose: 3000 });
+      if (!isInternal) toast.error("Login first to send message.", { duration: 3000 });
       return;
     }
     const smsContent = message || userSmsReply;
     if (!smsContent) {
-      toast.warn("Message cannot be empty.");
+      toast.error("Message cannot be empty.");
       return;
     }
 
@@ -319,14 +351,14 @@ const Client = () => {
 
     } catch (error) {
       console.error('SMS API Error:', error.response?.data || error.message);
-      toast.warn('Failed to send message. Please log in again.');
+      toast.error('Failed to send message. Please log in again.');
     }
   };
 
-  // --- Netpay Order Steps ---
+  // ==================== NETPAY ORDER WORKFLOW ====================
   const showNetpayDetails = (productId) => {
     if (!isLoggedIn) {
-      toast.warn("Login first to place a Netpay order.", { autoClose: 3000 });
+      toast.error("Login first to place a Netpay order.", { duration: 3000 });
       setLoginModalVisible(true);
       return;
     }
@@ -400,7 +432,7 @@ const Client = () => {
     }
   };
 
-
+  // ==================== RENDER HELPERS ====================
   const renderOfferTimer = (product) => {
     if (!product.offer || !product.offerTime) return null;
     const endTime = getOfferEndTime(product.offerTime);
@@ -419,12 +451,11 @@ const Client = () => {
       <h3>{product.model}</h3>
       <img src={product.image} alt={product.model} />
       <p className="price">Netpay Price: INR {product.netpayPrice}</p>
-      <p style={{ textDecoration: 'line-through', color: 'gray', fontSize: '0.9em' }}>Market Price: INR {product.bookingAmount}</p>
-      <p style={{ fontSize: '0.9em', color: 'green' }}>Original Price: INR {product.price}</p>
-      <button onClick={() => showNetpayDetails(product.id)}>Netpay</button>
+      <p className="price-struck">Market Price: INR {product.bookingAmount}</p>
+      <p className="price-original">Original Price: INR {product.price}</p>
+      <button onClick={() => showNetpayDetails(product.id)} className="btn-netpay">Netpay</button>
     </div>
   );
-
 
   const renderNetpayHistory = () => (
     <ul id="netpay-history-list" className="history-list">
@@ -445,12 +476,11 @@ const Client = () => {
             <p>{deliveryMessage}</p>
           </li>
         );
-      }) : <li>No Netpay history found.</li>}
+      }) : <li className="no-history">No Netpay history found.</li>}
     </ul>
   );
 
-
-  // Popup Order CSS 
+  // ==================== POPUP STYLES ====================
   const popupOverlayStyle = {
     position: 'fixed',
     top: 0,
@@ -497,26 +527,12 @@ const Client = () => {
     backgroundColor: '#2563EB'
   };
 
-
-  const [confirmingPayment, setConfirmingPayment] = useState(false);
-  const [orderSuccessPopup, setOrderSuccessPopup] = useState(false);
-
-  const navigate = useNavigate();
-
-  // Loader Animation 
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-  if (loading) return <Loading />;
-
+  // ==================== RENDER COMPONENT ====================
   return (
     <>
-      <ToastContainer position="top-right" autoClose={2000} toastStyle={{ fontSize: '10px', padding: '6px 12px', minHeight: '20px' }} />
+      <Toaster position="top-center" />
 
-      <Toaster />
-
+      {/* HEADER */}
       <div className="header">
         <img
           src={settings.companyLogo || "https://placehold.co/100x50/4F46E5/ffffff?text=Company+Logo"}
@@ -525,7 +541,7 @@ const Client = () => {
         />
         <h1>{settings.headerTitle || 'Booking Now'}</h1>
         <div className="date-time">{currentDateTime}</div>
-        <div className="login-status-container" style={{ position: 'absolute', top: '10px', right: '10px' }}>
+        <div className="login-status-container">
           {isLoggedIn ? (
             <button onClick={handleLogout} className="login-button">Logout ({loggedInUser.username})</button>
           ) : (
@@ -534,7 +550,7 @@ const Client = () => {
         </div>
       </div>
 
-      {/* Banner Carousel */}
+      {/* BANNER CAROUSEL */}
       {settings.banners && settings.banners.length > 0 && (
         <div className="banner-carousel">
           <div className="carousel-track" style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}>
@@ -547,8 +563,8 @@ const Client = () => {
         </div>
       )}
 
-      <div className="container">
-        {/* Home Page */}
+      <div className="container client-container">
+        {/* HOME PAGE */}
         <div id="home-page" className={`page ${activePage === 'home-page' ? 'active' : ''}`}>
           <div className="product-sections-container">
             <div className="product-section">
@@ -561,10 +577,10 @@ const Client = () => {
             </div>
           </div>
 
-          <div className="stats-section">
+          <div className="stats-section statistic-container">
             <h2>Statistics</h2>
-            <p>Total Netpay Sales: <span>{netpaySales.length}</span></p>
-            <button onClick={() => showPage('netpay-history-page')}>Netpay History</button>
+            <p>Total Netpay Sales: <span className="stats-number">{netpaySales.length}</span></p>
+            <button onClick={() => showPage('netpay-history-page')} className="btn-primary">View Netpay History</button>
           </div>
 
           <div className="delivery-image-display">
@@ -575,40 +591,58 @@ const Client = () => {
           </div>
 
           <div className="sms-section">
-            <h2>Company Staff Message</h2>
-            <p>{adminSms || 'No recent messages from the admin.'}</p>
+            <h2>Customer Support Message</h2>
+            <p className="admin-message">{adminSms || 'No recent messages from the admin.'}</p>
             <div className="form-group">
               <label htmlFor="user-sms-reply">Reply to Admin:</label>
               <textarea id="user-sms-reply" className="sms-input" rows="3" value={userSmsReply} onChange={(e) => setUserSmsReply(e.target.value)}></textarea>
             </div>
-            <button onClick={() => sendSmsToAdmin()}>Send Reply</button>
+            <button onClick={() => sendSmsToAdmin()} className="btn-primary">Send Reply</button>
           </div>
+
+          <div className="services-section">
+            <div className="service-item">
+              <FiCheckCircle className="service-icon" />
+              <span>Quality Service</span>
+            </div>
+
+            <div className="service-item">
+              <FiTruck className="service-icon" />
+              <span>Fast Delivery</span>
+            </div>
+
+            <div className="service-item">
+              <FiShield className="service-icon" />
+              <span>Trusted & Secure</span>
+            </div>
+          </div>
+
         </div>
 
-        {/* Netpay Pages */}
+        {/* NETPAY WORKFLOW PAGES */}
         {currentBookingModel && <>
           {/* Netpay Details Page */}
           <div id="netpay-details-page" className={`page ${activePage === 'netpay-details-page' ? 'active' : ''}`}>
-            <button onClick={() => showPage('home-page')}>Back to Home</button>
+            <button onClick={() => showPage('home-page')} className="btn-back">← Back to Home</button>
             <h2>Netpay Purchase</h2>
-            <div>
+            <div className="netpay-details">
               <h3>{currentBookingModel.model}</h3>
-              <img src={currentBookingModel.image} alt="Product Image" style={{ width: '100%', maxWidth: '400px', display: 'block', margin: '0 auto' }} />
+              <img src={currentBookingModel.image} alt="Product Image" className="netpay-product-image" />
               <h4>Item Full Details:</h4>
-              <p>{currentBookingModel.fullSpecs || 'No details available.'}</p>
-              <h3>Netpay Price: INR {currentBookingModel.netpayPrice}</h3>
+              <p className="item-specs">{currentBookingModel.fullSpecs || 'No details available.'}</p>
+              <h3 className="netpay-price">Netpay Price: INR {currentBookingModel.netpayPrice}</h3>
             </div>
-            <button onClick={() => showPage('netpay-info-page')}>Proceed to Checkout</button>
+            <button onClick={() => showPage('netpay-info-page')} className="btn-primary">Proceed to Checkout</button>
           </div>
 
           {/* Netpay Info Page */}
           <div id="netpay-info-page" className={`page ${activePage === 'netpay-info-page' ? 'active' : ''}`}>
-            <button onClick={() => showPage('netpay-details-page')}>Back</button>
+            <button onClick={() => showPage('netpay-details-page')} className="btn-back">← Back</button>
             <h2>Enter Your Details for Netpay</h2>
-            <form onSubmit={(e) => { e.preventDefault(); submitNetpayForm(); }}>
+            <form onSubmit={(e) => { e.preventDefault(); submitNetpayForm(); }} className="netpay-form">
               <div className="form-group">
                 <label>Item Name:</label>
-                <p style={{ fontWeight: 'bold' }}>{currentBookingModel.model}</p>
+                <p className="form-display-value">{currentBookingModel.model}</p>
               </div>
               <div className="form-group">
                 <label htmlFor="netpay-user-name">Your Name:</label>
@@ -622,21 +656,21 @@ const Client = () => {
                 <label htmlFor="netpay-user-address">Home Address:</label>
                 <textarea id="netpay-user-address" rows="3" value={netpayForm.address} onChange={handleNetpayFormChange} required></textarea>
               </div>
-              <button type="button" onClick={submitNetpayForm}>Proceed to Payment (QR)</button>
+              <button type="button" onClick={submitNetpayForm} className="btn-primary">Proceed to Payment (QR)</button>
             </form>
           </div>
 
           {/* Netpay QR Page */}
           <div id="netpay-qr-page" className={`page ${activePage === 'netpay-qr-page' ? 'active' : ''}`}>
-            <button onClick={() => showPage('netpay-info-page')}>Back</button>
+            <button onClick={() => showPage('netpay-info-page')} className="btn-back">← Back</button>
             <h2>Scan to Pay (INR {currentBookingModel.netpayPrice})</h2>
-            <img src={currentBookingModel.netpayQrCode} alt="QR Code" style={{ width: '100%', maxWidth: '300px', display: 'block', margin: '0 auto' }} />
-            <p>Please complete the payment and upload a screenshot of your payment confirmation below.</p>
+            <img src={currentBookingModel.netpayQrCode} alt="QR Code" className="qr-code-image" />
+            <p className="qr-instruction">Please complete the payment and upload a screenshot of your payment confirmation below.</p>
             <div className="form-group">
               <label htmlFor="netpay-screenshot-upload">Upload Screenshot:</label>
               <input type="file" id="netpay-screenshot-upload" accept="image/*" ref={netpayScreenshotRef} required />
             </div>
-            <button onClick={confirmNetpay} disabled={confirmingPayment}>
+            <button onClick={confirmNetpay} disabled={confirmingPayment} className="btn-primary">
               {confirmingPayment ? (
                 <span className="button-loader">
                   <div className="spinner-small"></div> Processing...
@@ -645,6 +679,7 @@ const Client = () => {
           </div>
         </>}
 
+        {/* ORDER SUCCESS POPUP */}
         {orderSuccessPopup && (
           <div style={popupOverlayStyle}>
             <div style={popupContentStyle}>
@@ -667,25 +702,24 @@ const Client = () => {
           </div>
         )}
 
-
-        {/* Netpay History Page */}
+        {/* NETPAY HISTORY PAGE */}
         <div id="netpay-history-page" className={`page ${activePage === 'netpay-history-page' ? 'active' : ''}`}>
-          <button onClick={() => showPage('home-page')}>Back to Home</button>
+          <button onClick={() => showPage('home-page')} className="btn-back">← Back to Home</button>
           <h2>Netpay History</h2>
           <div className="history-section">{renderNetpayHistory()}</div>
         </div>
       </div>
 
-      {/* Login Modal */}
+      {/* LOGIN MODAL */}
       <div id="login-modal" className={`modal ${loginModalVisible ? 'active' : ''}`}>
         <div className="modal-content">
           <LoginComponent onLoginSuccess={handleLoginSuccess} onModalClose={() => setLoginModalVisible(false)} />
         </div>
       </div>
 
+      {/* FOOTER */}
       <div className="email-display">
-        <p>For any queries, contact us at: <em>bookingmobile202526@gmail.com</em></p>
-        <button style={{ margin: "5px" }} onClick={() => navigate("/admin")}>Admin Portal</button>
+        <p>For any queries, contact us at: <em>phonebooking2025@gmail.com</em></p>
       </div>
     </>
   );

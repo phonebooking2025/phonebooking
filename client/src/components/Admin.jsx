@@ -1,15 +1,16 @@
-
-import React, { useState } from 'react';
-import { useAdminData, AdminDataProvider } from '../context/AdminContext';
-import { useAuth, AuthProvider } from '../context/AuthContext';
-import Loading from './Loading'; // <- new Loading component
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useAdminData, AdminDataProvider } from "../context/AdminContext";
+import { useAuth, AuthProvider } from "../context/AuthContext";
+import Loading from "./Loading"; // <- new Loading component
+import { useNavigate } from "react-router-dom";
+import "./Admin.css";
+import { FiGrid, FiHome, FiLogOut, FiSave, FiSend, FiSettings } from 'react-icons/fi'
 
 // --- ADMIN LOGIN FORM COMPONENT ---
 const AdminLoginForm = () => {
     const { login, loginError, loading } = useAuth();
-    const [mobile, setMobile] = useState('');
-    const [password, setPassword] = useState('');
+    const [mobile, setMobile] = useState("");
+    const [password, setPassword] = useState("");
 
     const navigate = useNavigate();
 
@@ -19,56 +20,90 @@ const AdminLoginForm = () => {
     };
 
     return (
-        <div style={{
-            maxWidth: '400px',
-            margin: '100px auto',
-            padding: '40px',
-            backgroundColor: '#fff',
-            borderRadius: '10px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-        }}>
-            <p className="home" style={{ fontSize: '12px', padding: '4px 6px', width: '80px', textAlign: 'center', backgroundColor: '#28a745', color: 'white', borderRadius: '5px', cursor: 'pointer' }} onClick={() => navigate("/")}>Home Page</p>
-            <h2 style={{ textAlign: 'center', color: '#264D59' }}>Admin Login</h2>
+        <div
+            style={{
+                maxWidth: "400px",
+                margin: "100px auto",
+                padding: "40px",
+                backgroundColor: "#fff",
+                borderRadius: "10px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+            }}
+        >
+            <p
+                className="home"
+                style={{
+                    fontSize: "12px",
+                    padding: "4px 6px",
+                    width: "80px",
+                    textAlign: "center",
+                    backgroundColor: "#28a745",
+                    color: "white",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                }}
+                onClick={() => navigate("/")}
+            >
+                Home Page
+            </p>
+            <h2 style={{ textAlign: "center", color: "#264D59" }}>Admin Login</h2>
             <form onSubmit={handleSubmit}>
-                {loginError && <p style={{ color: 'red', textAlign: 'center' }}>{loginError}</p>}
+                {loginError && (
+                    <p style={{ color: "red", textAlign: "center" }}>{loginError}</p>
+                )}
 
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px' }}>Mobile:</label>
+                <div style={{ marginBottom: "15px" }}>
+                    <label style={{ display: "block", marginBottom: "5px" }}>
+                        Mobile:
+                    </label>
                     <input
                         type="text"
                         value={mobile}
                         onChange={(e) => setMobile(e.target.value)}
                         required
-                        style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', boxSizing: 'border-box' }}
+                        style={{
+                            width: "100%",
+                            padding: "10px",
+                            border: "1px solid #ccc",
+                            borderRadius: "5px",
+                            boxSizing: "border-box",
+                        }}
                     />
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px' }}>Password:</label>
+                <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", marginBottom: "5px" }}>
+                        Password:
+                    </label>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', boxSizing: 'border-box' }}
+                        style={{
+                            width: "100%",
+                            padding: "10px",
+                            border: "1px solid #ccc",
+                            borderRadius: "5px",
+                            boxSizing: "border-box",
+                        }}
                     />
                 </div>
-
 
                 <button
                     type="submit"
                     disabled={loading}
                     style={{
-                        width: '100%',
-                        padding: '10px',
-                        backgroundColor: '#264D59',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: 'pointer'
+                        width: "100%",
+                        padding: "10px",
+                        backgroundColor: "#264D59",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: "pointer",
                     }}
                 >
-                    {loading ? 'Logging In...' : 'Login'}
+                    {loading ? "Logging In..." : "Login"}
                 </button>
             </form>
         </div>
@@ -79,14 +114,31 @@ const AdminLoginForm = () => {
 const AdminContent = () => {
     const { logout } = useAuth();
 
+    const navigate = useNavigate();
+
     // Consume state and actions from the context
     const {
-        preciousItems, otherItems, netpaySales, settings, loading, error,
-        setAdminSmsReply, handleProductChange, addMoreProduct, deleteProduct, handleSettingsChange,
-        handleBannerFileChange, addBannerInput, deleteBanner, confirmNetpayDelivery, sendSmsToUser,
-        saveAllChanges, latestUserMessage, adminReplyContent, setAdminReplyContent,
+        preciousItems,
+        otherItems,
+        netpaySales,
+        settings,
+        loading,
+        error,
+        setAdminSmsReply,
+        handleProductChange,
+        addMoreProduct,
+        deleteProduct,
+        handleSettingsChange,
+        handleBannerFileChange,
+        addBannerInput,
+        deleteBanner,
+        confirmNetpayDelivery,
+        sendSmsToUser,
+        saveAllChanges,
+        latestUserMessage,
+        adminReplyContent,
+        setAdminReplyContent,
     } = useAdminData();
-
 
     const renderBannerImage = (banner) => {
         if (!banner) return null;
@@ -95,194 +147,561 @@ const AdminContent = () => {
         return null;
     };
 
-    const renderFilePreview = (file, url) => file ? URL.createObjectURL(file) : url;
+    const renderFilePreview = (file, url) =>
+        file ? URL.createObjectURL(file) : url;
 
     if (loading) return <Loading />; // <- animated loading for 2s
 
-    if (error) return <div style={{ textAlign: 'center', padding: '50px', color: 'red' }}>⚠️ Data Error: {error}</div>;
+    if (error)
+        return (
+            <div style={{ textAlign: "center", padding: "50px", color: "red" }}>
+                ⚠️ Data Error: {error}
+            </div>
+        );
 
     return (
         <>
-            <style>{`
-                body { overflow-x:hidden; background-color: #f4f4f4; padding: 20px  5px; }
-                .container { width:100%; max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-                h1, h2 { text-align: center; color: #333; }
-                .form-section { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; position: relative; }
-                .form-group { margin-bottom: 15px; }
-                .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-                .form-group input, .form-group textarea { box-sizing: border-box; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; word-wrap: break-word; overflow-wrap: break-word; }
-                .form-group textarea { resize: vertical; max-height: 150px; }
-                .form-group input[type="file"] { border: none; padding: 3px; }
-                .form-actions { text-align: right; margin-top: 10px; }
-                .main-buttons { text-align: center; margin-top: 20px; }
-                .main-buttons button, .form-actions button { background-color: #264D59; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em; margin: 0 5px; }
-                .main-buttons button:hover, .form-actions button:hover { background-color: #3e7b8c; }
-                .data-display { background: #e9e9e9; padding: 15px; margin-top: 20px; border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word; }
-                .data-display h3 { margin-top: 0; }
-                .data-display ul { list-style-type: none; padding: 0; }
-                .data-display li { background: white; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 4px; word-wrap: break-word; overflow-wrap: break-word; }
-                .confirm-btn { background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-                .confirm-btn:hover { background-color: #218838; }
-                .user-screenshot { width:200px; max-width: 100%; height: auto; margin-top: 10px; margin-bottom:25px; border: 1px solid #ddd; }
-                .delete-btn { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.5em; margin-left: 10px; margin-top: 5px; transition: background-color 0.3s ease; }
-                .delete-btn:hover { background-color: #c82333; }
-                .confirmation-status { color: green; font-weight: bold; display: flex; align-items: center; }
-                .confirmation-status span { margin-left: 5px; }
-                .banner-item { display: flex; align-items: center; margin-bottom: 10px; gap: 10px; }
-                .banner-item input[type="file"] { flex-grow: 1; }
-                .header-actions { display: flex; justify-content: flex-end; padding-top: 10px; }
-                .header-actions button { margin-left: 10px; background-color: #264D59; color: white; border-radius: 5px; padding: 8px 15px; border: none; cursor: pointer; }
-                .header-actions button:hover { background-color: #3e7b8c; }
-                .banner-item{display:block; gap:2px}
-                .home{ padding:10px 15px; background-color:#28a745; color:white; border-radius:5px; text-align:center; font-weight:bold; cursor:pointer; }
-            `}</style>
-
             <div className="container">
-                <div className="header-actions" style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '10px'
-                }}>
-                    <button style={{ fontSize: "14px", border: "none", padding: '5px 6px', width: '120px', textAlign: 'center', backgroundColor: '#FFC107', color: 'white', borderRadius: '5px', cursor: 'pointer' }} onClick={() => navigate("/")}>Home Page</button>
-                    <button style={{ fontSize: "14px", border: "none", padding: '5px 6px', width: '120px', textAlign: 'center', backgroundColor: '#dc3545', color: 'white', borderRadius: '5px', cursor: 'pointer' }} onClick={logout}>Logout</button>
+                <div className="header-actions">
+                    <button className="btn btn-home" onClick={() => navigate("/dashboard")}>
+                        <FiGrid className="icon-left" />
+                        <span>Dashboard</span>
+                    </button>
+
+                    <button className="btn btn-logout" onClick={logout}>
+                        <span>Logout</span>
+                        <FiLogOut className="icon-right" />
+                    </button>
                 </div>
 
-                <h1 style={{ color: '#2D9966' }}>Admin Panel</h1>
-
+                <h1 style={{ color: "#2D9966", fontSize:"22px", fontWeight:"700" }}>Admin Panel</h1>
 
                 {/* --- 1. Website Customization --- */}
                 <div className="form-section">
-                    <h2>Website Customization</h2>
-                    <div className="form-group">
-                        <label htmlFor="header-title">User Panel Header Title:</label>
-                        <input type="text" id="header-title" placeholder="Enter title (any language)" value={settings.headerTitle || ''} onChange={e => handleSettingsChange('headerTitle', e.target.value)} />
-                    </div>
+                    <h2 className="section-title">
+                        <FiSettings size={22} />
+                        <span> Website Customization</span>
+                    </h2>
 
-                    {/* Company Logo */}
-                    <div className="form-group">
-                        <label htmlFor="company-logo-upload">Company Logo:</label>
-                        {(settings.companyLogo || settings.companyLogoFile) && <img src={renderFilePreview(settings.companyLogoFile, settings.companyLogo)} alt="Logo Preview" style={{ maxWidth: '100px', display: 'block', marginBottom: '10px' }} />}
-                        <input type="file" id="company-logo-upload" accept="image/*" onChange={e => handleSettingsChange('companyLogoFile', e.target.files[0])} />
-                    </div>
+                    <div className="form-container grid grid-cols-3 max-sm:grid-cols-1">
+                        <div className="form-group">
+                            <label htmlFor="header-title">User Panel Header Title:</label>
+                            <input
+                                type="text"
+                                id="header-title"
+                                placeholder="Enter title (any language)"
+                                value={settings.headerTitle || ""}
+                                onChange={(e) =>
+                                    handleSettingsChange("headerTitle", e.target.value)
+                                }
+                            />
+                        </div>
 
-                    {/* Delivery Vehicle Image */}
-                    <div className="form-group">
-                        <label htmlFor="delivery-image-upload">Delivery Vehicle Image:</label>
-                        {(settings.deliveryImage || settings.deliveryImageFile) && <img src={renderFilePreview(settings.deliveryImageFile, settings.deliveryImage)} alt="Delivery Preview" style={{ maxWidth: '150px', display: 'block', marginBottom: '10px' }} />}
-                        <input type="file" id="delivery-image-upload" accept="image/*" onChange={e => handleSettingsChange('deliveryImageFile', e.target.files[0])} />
+                        {/* Company Logo */}
+                        <div className="form-group">
+                            <label htmlFor="company-logo-upload">Company Logo:</label>
+                            {(settings.companyLogo || settings.companyLogoFile) && (
+                                <img
+                                    src={renderFilePreview(
+                                        settings.companyLogoFile,
+                                        settings.companyLogo
+                                    )}
+                                    alt="Logo Preview"
+                                    style={{
+                                        maxWidth: "100px",
+                                        display: "block",
+                                        marginBottom: "10px",
+                                    }}
+                                />
+                            )}
+                            <input
+                                type="file"
+                                id="company-logo-upload"
+                                accept="image/*"
+                                onChange={(e) =>
+                                    handleSettingsChange("companyLogoFile", e.target.files[0])
+                                }
+                            />
+                        </div>
+
+                        {/* Delivery Vehicle Image */}
+                        <div className="form-group">
+                            <label htmlFor="delivery-image-upload">
+                                Delivery Vehicle Image:
+                            </label>
+                            {(settings.deliveryImage || settings.deliveryImageFile) && (
+                                <img
+                                    src={renderFilePreview(
+                                        settings.deliveryImageFile,
+                                        settings.deliveryImage
+                                    )}
+                                    alt="Delivery Preview"
+                                    style={{
+                                        maxWidth: "150px",
+                                        display: "block",
+                                        marginBottom: "10px",
+                                    }}
+                                />
+                            )}
+                            <input
+                                type="file"
+                                id="delivery-image-upload"
+                                accept="image/*"
+                                onChange={(e) =>
+                                    handleSettingsChange("deliveryImageFile", e.target.files[0])
+                                }
+                            />
+                        </div>
                     </div>
 
                     {/* Banner Section */}
                     <div className="form-section">
-                        <h2>Homepage Banners (Max 5)</h2>
+                        <h2 className="section-title">Homepage Banners (Max 5)</h2>
+
                         <div id="banner-uploads-container">
                             {(settings.banners || []).map((banner, index) => {
                                 const imgSrc = renderBannerImage(banner);
+
                                 return (
                                     <div className="banner-item" key={index}>
-                                        {!!imgSrc && <img src={imgSrc} alt={`Banner ${index + 1}`} style={{ width: '100px', height: '50px', objectFit: 'cover' }} />}
-                                        <input type="file" accept="image/*" onChange={e => handleBannerFileChange(index, e.target.files[0])} />
-                                        <button type="button" className="delete-btn" onClick={() => deleteBanner(index)}>Delete</button>
+                                        {/* Preview */}
+                                        <div className="banner-preview">
+                                            {imgSrc ? (
+                                                <img
+                                                    src={imgSrc}
+                                                    alt={`Banner ${index + 1}`}
+                                                />
+                                            ) : (
+                                                <span>No Image</span>
+                                            )}
+                                        </div>
+
+                                        {/* Upload */}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) =>
+                                                handleBannerFileChange(index, e.target.files[0])
+                                            }
+                                        />
+
+                                        {/* Delete */}
+                                        <button
+                                            type="button"
+                                            className="delete-btn"
+                                            onClick={() => deleteBanner(index)}
+                                        >
+                                            Delete
+                                        </button>
                                     </div>
                                 );
                             })}
                         </div>
+
                         <div className="form-actions">
-                            <button type="button" onClick={addBannerInput}>Add More Banners</button>
+                            <button type="button" className="banner-button" onClick={addBannerInput}>
+                                Add More Banners
+                            </button>
                         </div>
                     </div>
+
                 </div>
 
-                {/* --- 2. Precious Metal Items (Mobiles) --- */}
-                <div id="admin-forms-container" className="form-section">
+                {/* --- Precious Metal Items --- */}
+                <div id="admin-forms-container" className="form-section precious-section">
                     <h2>Precious Metal Items</h2>
+
                     {preciousItems.map((item, index) => (
-                        <div className="form-section" key={item.id || index}>
-                            <div className="form-actions" style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                                <button className="delete-btn" onClick={() => deleteProduct(item.id, index, 'precious')}>Delete</button>
+                        <div className="form-section precious-card" key={item.id || index}>
+                            <div className="form-actions top-actions">
+                                <button
+                                    className="delete-btn"
+                                    onClick={() => deleteProduct(item.id, index, "precious")}
+                                >
+                                    Delete
+                                </button>
                             </div>
-                            <h3>Precious Metal Item Details {index + 1}</h3>
-                            <div className="form-group"><label>Item Name:</label><input type="text" value={item.model || ''} onChange={e => handleProductChange(index, 'model', e.target.value, 'precious')} /></div>
 
-                            <div className="form-group"><label>Image (1MB - 100MB):</label>{(item.image || item.imageFile) && <img src={renderFilePreview(item.imageFile, item.image)} alt="Preview" style={{ maxWidth: '100px', display: 'block', marginBottom: '10px' }} />}{item.imageFile ? <span style={{ color: 'blue' }}>New file selected.</span> : null}<input type="file" accept="image/*" onChange={e => handleProductChange(index, 'imageFile', e.target.files[0], 'precious')} /></div>
+                            <h3>Precious Metal Item {index + 1}</h3>
 
-                            <div className="form-group"><label>NetPay QR Code (1MB - 50MB):</label>{(item.netpayQrCode || item.netpayQrCodeFile) && <img src={renderFilePreview(item.netpayQrCodeFile, item.netpayQrCode)} alt="QR Preview" style={{ maxWidth: '100px', display: 'block', marginBottom: '10px' }} />}{item.netpayQrCodeFile ? <span style={{ color: 'blue' }}>New file selected.</span> : null}<input type="file" accept="image/*" onChange={e => handleProductChange(index, 'netpayQrCodeFile', e.target.files[0], 'precious')} /></div>
+                            <div className="form-container">
+                                <div className="form-group">
+                                    <label>Item Name</label>
+                                    <input
+                                        type="text"
+                                        value={item.model || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "model", e.target.value, "precious")
+                                        }
+                                    />
+                                </div>
 
-                            <div className="form-group"><label>Original Price (INR):</label><input type="number" value={item.price || ''} onChange={e => handleProductChange(index, 'price', e.target.value, 'precious')} /></div>
-                            <div className="form-group"><label>Market Price (INR):</label><input type="number" value={item.bookingAmount || ''} onChange={e => handleProductChange(index, 'bookingAmount', e.target.value, 'precious')} /></div>
-                            <div className="form-group"><label>Netpay Amount (INR):</label><input type="number" value={item.netpayPrice || ''} onChange={e => handleProductChange(index, 'netpayPrice', e.target.value, 'precious')} /></div>
-                            <div className="form-group"><label>Offer Percentage (%):</label><input type="number" min="0" max="100" value={item.offer || ''} onChange={e => handleProductChange(index, 'offer', e.target.value, 'precious')} /></div>
-                            <div className="form-group"><label>Offer End Time (HH:MM):</label><input type="time" value={item.offerTime || ''} onChange={e => handleProductChange(index, 'offerTime', e.target.value, 'precious')} /></div>
-                            <div className="form-group"><label>Item Full Details:</label><textarea rows="5" value={item.fullSpecs || ''} onChange={e => handleProductChange(index, 'fullSpecs', e.target.value, 'precious')}></textarea></div>
+                                <div className="form-group">
+                                    <label>Original Price (INR)</label>
+                                    <input
+                                        type="number"
+                                        value={item.price || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "price", e.target.value, "precious")
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Market Price (INR)</label>
+                                    <input
+                                        type="number"
+                                        value={item.bookingAmount || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "bookingAmount", e.target.value, "precious")
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Netpay Amount (INR)</label>
+                                    <input
+                                        type="number"
+                                        value={item.netpayPrice || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "netpayPrice", e.target.value, "precious")
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Offer (%)</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={item.offer || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "offer", e.target.value, "precious")
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Offer End Time</label>
+                                    <input
+                                        type="time"
+                                        value={item.offerTime || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "offerTime", e.target.value, "precious")
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Images */}
+                            <div className="form-container">
+                                <div className="form-group">
+                                    <label>Item Image</label>
+                                    {(item.image || item.imageFile) && (
+                                        <img
+                                            className="thumb"
+                                            src={renderFilePreview(item.imageFile, item.image)}
+                                            alt="Preview"
+                                        />
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) =>
+                                            handleProductChange(index, "imageFile", e.target.files[0], "precious")
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>NetPay QR Code</label>
+                                    {(item.netpayQrCode || item.netpayQrCodeFile) && (
+                                        <img
+                                            className="thumb"
+                                            src={renderFilePreview(item.netpayQrCodeFile, item.netpayQrCode)}
+                                            alt="QR"
+                                        />
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) =>
+                                            handleProductChange(
+                                                index,
+                                                "netpayQrCodeFile",
+                                                e.target.files[0],
+                                                "precious"
+                                            )
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group fullwidth">
+                                <label>Item Full Details</label>
+                                <textarea
+                                    rows="4"
+                                    value={item.fullSpecs || ""}
+                                    onChange={(e) =>
+                                        handleProductChange(index, "fullSpecs", e.target.value, "precious")
+                                    }
+                                />
+                            </div>
                         </div>
                     ))}
+
                     <div className="form-actions">
-                        <button onClick={() => addMoreProduct('precious')}>Add More Precious Metal Items</button>
+                        <button className="btn-add-precious" onClick={() => addMoreProduct("precious")}>
+                            + Add More Precious Metal Items
+                        </button>
                     </div>
+
                 </div>
 
-                {/* --- 3. Other Items (Home Appliances) --- */}
-                <div id="home-appliances-forms-container" className="form-section">
+                {/* --- Other Items (Home Appliances) --- */}
+                <div
+                    id="home-appliances-forms-container"
+                    className="form-section other-section"
+                >
                     <h2>Other Items Details</h2>
+
                     {otherItems.map((item, index) => (
-                        <div className="form-section" key={item.id || index}>
-                            <div className="form-actions" style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                                <button className="delete-btn" onClick={() => deleteProduct(item.id, index, 'other')}>Delete</button>
+                        <div className="form-section other-card" key={item.id || index}>
+                            <div className="form-actions top-actions">
+                                <button
+                                    className="delete-btn"
+                                    onClick={() => deleteProduct(item.id, index, "other")}
+                                >
+                                    Delete
+                                </button>
                             </div>
-                            <h3>Other Item Details {index + 1}</h3>
-                            <div className="form-group"><label>Item Name:</label><input type="text" value={item.model || ''} onChange={e => handleProductChange(index, 'model', e.target.value, 'other')} /></div>
 
-                            <div className="form-group"><label>Image (1MB - 100MB):</label>{(item.image || item.imageFile) && <img src={renderFilePreview(item.imageFile, item.image)} alt="Preview" style={{ maxWidth: '100px', display: 'block', marginBottom: '10px' }} />}{item.imageFile ? <span style={{ color: 'blue' }}>New file selected.</span> : null}<input type="file" accept="image/*" onChange={e => handleProductChange(index, 'imageFile', e.target.files[0], 'other')} /></div>
+                            <h3>Other Item {index + 1}</h3>
 
-                            <div className="form-group"><label>NetPay QR Code (1MB - 50MB):</label>{(item.netpayQrCode || item.netpayQrCodeFile) && <img src={renderFilePreview(item.netpayQrCodeFile, item.netpayQrCode)} alt="QR Preview" style={{ maxWidth: '100px', display: 'block', marginBottom: '10px' }} />}{item.netpayQrCodeFile ? <span style={{ color: 'blue' }}>New file selected.</span> : null}<input type="file" accept="image/*" onChange={e => handleProductChange(index, 'netpayQrCodeFile', e.target.files[0], 'other')} /></div>
+                            {/* Grid Fields */}
+                            <div className="form-container">
+                                <div className="form-group">
+                                    <label>Item Name</label>
+                                    <input
+                                        type="text"
+                                        value={item.model || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "model", e.target.value, "other")
+                                        }
+                                    />
+                                </div>
 
-                            <div className="form-group"><label>Original Price (INR):</label><input type="number" value={item.price || ''} onChange={e => handleProductChange(index, 'price', e.target.value, 'other')} /></div>
-                            <div className="form-group"><label>Market Price (INR):</label><input type="number" value={item.bookingAmount || ''} onChange={e => handleProductChange(index, 'bookingAmount', e.target.value, 'other')} /></div>
-                            <div className="form-group"><label>Netpay Amount (INR):</label><input type="number" value={item.netpayPrice || ''} onChange={e => handleProductChange(index, 'netpayPrice', e.target.value, 'other')} /></div>
-                            <div className="form-group"><label>Offer Percentage (%):</label><input type="number" min="0" max="100" value={item.offer || ''} onChange={e => handleProductChange(index, 'offer', e.target.value, 'other')} /></div>
-                            <div className="form-group"><label>Offer End Time (HH:MM):</label><input type="time" value={item.offerTime || ''} onChange={e => handleProductChange(index, 'offerTime', e.target.value, 'other')} /></div>
-                            <div className="form-group"><label>Item Full Details:</label><textarea rows="5" value={item.fullSpecs || ''} onChange={e => handleProductChange(index, 'fullSpecs', e.target.value, 'other')}></textarea></div>
+                                <div className="form-group">
+                                    <label>Original Price (INR)</label>
+                                    <input
+                                        type="number"
+                                        value={item.price || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "price", e.target.value, "other")
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Market Price (INR)</label>
+                                    <input
+                                        type="number"
+                                        value={item.bookingAmount || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(
+                                                index,
+                                                "bookingAmount",
+                                                e.target.value,
+                                                "other"
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Netpay Amount (INR)</label>
+                                    <input
+                                        type="number"
+                                        value={item.netpayPrice || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(
+                                                index,
+                                                "netpayPrice",
+                                                e.target.value,
+                                                "other"
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Offer (%)</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={item.offer || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "offer", e.target.value, "other")
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Offer End Time</label>
+                                    <input
+                                        type="time"
+                                        value={item.offerTime || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(
+                                                index,
+                                                "offerTime",
+                                                e.target.value,
+                                                "other"
+                                            )
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Images */}
+                            <div className="form-container">
+                                <div className="form-group">
+                                    <label>Item Image</label>
+                                    {(item.image || item.imageFile) && (
+                                        <img
+                                            className="thumb"
+                                            src={renderFilePreview(item.imageFile, item.image)}
+                                            alt="Preview"
+                                        />
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) =>
+                                            handleProductChange(
+                                                index,
+                                                "imageFile",
+                                                e.target.files[0],
+                                                "other"
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>NetPay QR Code</label>
+                                    {(item.netpayQrCode || item.netpayQrCodeFile) && (
+                                        <img
+                                            className="thumb"
+                                            src={renderFilePreview(
+                                                item.netpayQrCodeFile,
+                                                item.netpayQrCode
+                                            )}
+                                            alt="QR"
+                                        />
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) =>
+                                            handleProductChange(
+                                                index,
+                                                "netpayQrCodeFile",
+                                                e.target.files[0],
+                                                "other"
+                                            )
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group fullwidth">
+                                <label>Item Full Details</label>
+                                <textarea
+                                    rows="4"
+                                    value={item.fullSpecs || ""}
+                                    onChange={(e) =>
+                                        handleProductChange(
+                                            index,
+                                            "fullSpecs",
+                                            e.target.value,
+                                            "other"
+                                        )
+                                    }
+                                />
+                            </div>
                         </div>
                     ))}
+
                     <div className="form-actions">
-                        <button onClick={() => addMoreProduct('other')}>Add More Other Items</button>
+                        <button
+                            className="btn-add-other"
+                            onClick={() => addMoreProduct("other")}
+                        >
+                            + Add More Other Items
+                        </button>
                     </div>
                 </div>
 
-                {/* --- 4. User Sales Data --- */}
-                <div className="data-display form-section">
+
+                {/* --- User Sales Data --- */}
+                <div className="form-section sales-section">
                     <h2>Netpay Sales / Orders</h2>
+
                     {netpaySales.length === 0 ? (
-                        <p>No netpay sales or no pending/confirmed orders.</p>
+                        <p className="muted">No netpay sales or pending / confirmed orders.</p>
                     ) : (
-                        <ul>
+                        <div className="sales-grid">
                             {netpaySales.map((sale) => (
-                                <li key={sale.id}>
-                                    <strong>Item:</strong> {sale.model}<br />
-                                    <strong>User:</strong> {sale.userName}<br />
-                                    <strong>Mobile:</strong>{sale.mobile}<br />
-                                    <strong>Address:</strong>{sale.address}<br />
-                                    <strong>Amount:</strong> INR {sale.amount}<br />
+                                <div className="sales-card" key={sale.id}>
+                                    <div className="sales-header">
+                                        <h3>{sale.model}</h3>
+                                        <span className="amount-badge">₹ {sale.amount}</span>
+                                    </div>
+
+                                    <div className="sales-info">
+                                        <p><strong>User:</strong> {sale.userName}</p>
+                                        <p><strong>Mobile:</strong> {sale.mobile}</p>
+                                        <p><strong>Address:</strong> {sale.address}</p>
+                                    </div>
+
                                     {sale.screenshot && (
-                                        <>
-                                            <strong>Payment Screenshot:</strong>
-                                            <img src={sale.screenshot} alt="Payment Proof" className="user-screenshot" />
-                                        </>
-                                    )}
-                                    {sale.deliveryStatus === 'Confirmed' && sale.deliveryDate ? (
-                                        <div className="confirmation-status">
-                                            <span>✅ Confirmed. Est. Delivery: {new Date(sale.deliveryDate).toDateString()}</span>
+                                        <div className="sales-image">
+                                            <strong>Payment Screenshot</strong>
+                                            <img
+                                                src={sale.screenshot}
+                                                alt="Payment Proof"
+                                                className="user-screenshot"
+                                            />
                                         </div>
-                                    ) : (
-                                        <button className="confirm-btn" onClick={() => confirmNetpayDelivery(sale.id)}>Confirm Delivery</button>
                                     )}
-                                </li>
+
+                                    <div className="sales-actions">
+                                        {sale.deliveryStatus === "Confirmed" && sale.deliveryDate ? (
+                                            <div className="confirmation-status">
+                                                ✅ Confirmed <br />
+                                                <span className="muted">
+                                                    Est. Delivery:{" "}
+                                                    {new Date(sale.deliveryDate).toDateString()}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                className="confirm-btn"
+                                                onClick={() => confirmNetpayDelivery(sale.id)}
+                                            >
+                                                Confirm Delivery
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     )}
                 </div>
+
 
                 {/* --- 5. User SMS and Reply --- */}
                 <div className="data-display form-section">
@@ -293,7 +712,7 @@ const AdminContent = () => {
                         <textarea
                             rows="3"
                             readOnly
-                            value={latestUserMessage?.content || 'No messages from users.'}
+                            value={latestUserMessage?.content || "No messages from users."}
                         ></textarea>
                     </div>
 
@@ -302,22 +721,25 @@ const AdminContent = () => {
                         <textarea
                             rows="3"
                             value={adminReplyContent}
-                            onChange={e => setAdminReplyContent(e.target.value)}
+                            onChange={(e) => setAdminReplyContent(e.target.value)}
                             placeholder="Type your reply here..."
                         ></textarea>
                     </div>
 
                     <div className="form-actions">
-                        <button onClick={sendSmsToUser}>Send Reply to User</button>
+                        <button className="btn-reply-user" onClick={sendSmsToUser} >
+                            <FiSend className="btn-icon" />
+                            Send Reply to User
+                        </button>
                     </div>
                 </div>
 
-
-                {/* --- Main Save Button --- */}
                 <div className="main-buttons">
-                    <button onClick={saveAllChanges}>SAVE ALL CHANGES TO WEBSITE</button>
+                    <button className="btn-save-all" onClick={saveAllChanges} >
+                        <FiSave className="btn-icon" />
+                        Save All Changes
+                    </button>
                 </div>
-
             </div>
         </>
     );
@@ -329,7 +751,11 @@ const AuthGate = () => {
     const { isAuthenticated, loading } = useAuth();
 
     if (loading) {
-        return <div style={{ textAlign: 'center', padding: '100px', fontSize: '1.5em' }}>Checking Authentication Status...</div>;
+        return (
+            <div style={{ textAlign: "center", padding: "100px", fontSize: "1.5em" }}>
+                Checking Authentication Status...
+            </div>
+        );
     }
 
     if (!isAuthenticated) {
@@ -342,7 +768,7 @@ const AuthGate = () => {
             <AdminContent />
         </AdminDataProvider>
     );
-}
+};
 
 // --- WRAPPER COMPONENT (Entry Point) ---
 const Admin = () => {

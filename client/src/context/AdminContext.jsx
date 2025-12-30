@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
+import toast from "react-hot-toast";
+
 
 const AdminContext = createContext();
 const API_URL = 'https://phonebooking.vercel.app/api';
@@ -326,11 +328,11 @@ export const AdminDataProvider = ({ children }) => {
             }
 
             await fetchAdminData();
-            alert('✅ All changes saved successfully!');
+            toast.success("All changes saved successfully");
         } catch (err) {
             console.error('Save all error:', err);
             setError(err.response?.data?.details || err.message);
-            alert(`Error: ${err.response?.data?.details || err.message}`);
+            toast.error(err.response?.data?.details || err.message);
         } finally {
             setLoading(false);
         }
