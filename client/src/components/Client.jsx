@@ -253,6 +253,10 @@ const Client = () => {
   const [currentBookingModel, setCurrentBookingModel] = useState(null);
   const [pendingNetpay, setPendingNetpay] = useState(null);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [pendingEmi, setPendingEmi] = useState(null);
+  const [confirmingEmi, setConfirmingEmi] = useState(false);
+  const [emiSelectedMonths, setEmiSelectedMonths] = useState('');
+  const [emiDownPaymentInput, setEmiDownPaymentInput] = useState('');
   const [orderSuccessPopup, setOrderSuccessPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [time, setTime] = useState(new Date());
@@ -371,6 +375,75 @@ const Client = () => {
     }
   };
 
+  // ==================== EMI WORKFLOW ====================
+  const showEmiDetails = (productId) => {
+    if (!isLoggedIn) {
+      toast.error("Login first to place an EMI order.", { duration: 3000 });
+      setLoginModalVisible(true);
+      return;
+    }
+    const allProducts = [...mobileData, ...homeAppliancesData];
+    const product = allProducts.find(p => p.id === productId);
+    if (product) {
+      setCurrentBookingModel(product);
+      showPage('emi-details-page');
+    }
+  };
+
+  const submitEmiForm = () => {
+    if (!netpayForm.name || !netpayForm.mobile || !netpayForm.address) {
+      toast.error('Please fill all the required fields (Name, Mobile, Address).');
+      return;
+    }
+    const emiMonthsList = (emiSelectedMonths || currentBookingModel?.emiMonths || '').split(',').map(s => s.trim()).filter(Boolean);
+    const months = emiMonthsList.length > 0 ? emiMonthsList[0] : '';
+    setPendingEmi({
+      product_id: currentBookingModel.id,
+      name: netpayForm.name,
+      mobile: netpayForm.mobile,
+      address: netpayForm.address,
+      model: currentBookingModel.model,
+      amount: currentBookingModel.netpayPrice,
+      emiMonths: emiSelectedMonths || currentBookingModel?.emiMonths || '',
+      downPayment: emiDownPaymentInput || currentBookingModel?.downPaymentAmount || 0,
+      timestamp: new Date().toISOString(),
+    });
+    showPage('emi-qr-page');
+  };
+
+  const confirmEmi = async () => {
+    if (!netpayScreenshotRef.current || netpayScreenshotRef.current.files.length === 0) return;
+    if (!pendingEmi) return;
+
+    setConfirmingEmi(true);
+
+    try {
+      const file = netpayScreenshotRef.current.files[0];
+      const formData = new FormData();
+      formData.append('product_id', pendingEmi.product_id);
+      formData.append('user_name', pendingEmi.name);
+      formData.append('product_name', pendingEmi.model);
+      formData.append('mobile', pendingEmi.mobile);
+      formData.append('address', pendingEmi.address);
+      formData.append('amount', pendingEmi.amount);
+      formData.append('emi_months', pendingEmi.emiMonths);
+      formData.append('down_payment', pendingEmi.downPayment);
+      formData.append('screenshot', file);
+
+      const response = await axiosInstance.post('/orders/place', formData);
+
+      setPendingEmi(null);
+      setNetpayForm(prev => ({ ...prev, address: '' }));
+      showPage('netpay-history-page');
+      setOrderSuccessPopup(true);
+
+    } catch (error) {
+      console.error("EMI order placement API error:", error.response?.data || error.message);
+    } finally {
+      setConfirmingEmi(false)
+    }
+  };
+
   const submitNetpayForm = () => {
     if (!netpayForm.name || !netpayForm.mobile || !netpayForm.address) {
       toast.error('Please fill all the required fields (Name, Mobile, Address).');
@@ -445,18 +518,31 @@ const Client = () => {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   };
 
+
   const renderProductCard = (product) => (
     <div className="product-card" key={product.id}>
-      {product.offer && <div className="offer-circle"><span className="offer-text">{product.offer}% OFF</span></div>}
-      {product.offer && product.offerTime && renderOfferTimer(product) && <div className="offer-time-display">{renderOfferTimer(product)}</div>}
-      <h3>{product.model}</h3>
-      <img src={product.image} alt={product.model} />
-      <p className="price">Netpay Price: INR {product.netpayPrice}</p>
-      <p className="price-struck">Market Price: INR {product.bookingAmount}</p>
-      <p className="price-original">Original Price: INR {product.price}</p>
-      <button onClick={() => showNetpayDetails(product.id)} className="btn-netpay">Netpay</button>
+      {product.offer && (
+        <div className="offer-circle">
+          <span className="offer-text">{product.offer}%</span>
+        </div>
+      )}
+      <div className="product-image">
+        <img src={product.image} alt={product.model} loading="lazy" />
+      </div>
+      <div className="product-content">
+        <h3>{product.model}</h3>
+        <p className="price-struck">Market: ₹{product.bookingAmount}</p>
+        <p className="price">Netpay: ₹{product.netpayPrice}</p>
+        <div className="product-actions">
+          <button onClick={() => showNetpayDetails(product.id)} className="btn-netpay">View</button>
+          {product.emiMonths && product.emiMonths.toString().trim() !== '' && (
+            <button onClick={() => showEmiDetails(product.id)} className="btn-emi">EMI</button>
+          )}
+        </div>
+      </div>
     </div>
   );
+
 
   const renderNetpayHistory = () => (
     <ul id="netpay-history-list" className="history-list">
@@ -568,15 +654,21 @@ const Client = () => {
         {/* HOME PAGE */}
         <div id="home-page" className={`page ${activePage === 'home-page' ? 'active' : ''}`}>
           <div className="product-sections-container">
-            <div className="product-section">
-              <h2 className="section-title">Precious Items</h2>
-              <div className="product-list">{mobileData.map(renderProductCard)}</div>
+            <div className="product-section left-section">
+              <h2 className="section-title">Mobile Items</h2>
+              <div className="product-list grid-cards">
+                {mobileData.map(renderProductCard)}
+              </div>
             </div>
-            <div className="product-section">
+
+            <div className="product-section right-section">
               <h2 className="section-title">Other Items</h2>
-              <div className="product-list">{homeAppliancesData.map(renderProductCard)}</div>
+              <div className="product-list grid-cards">
+                {homeAppliancesData.map(renderProductCard)}
+              </div>
             </div>
           </div>
+
 
           <div className="stats-section statistic-container">
             <h2>Statistics</h2>
@@ -640,23 +732,23 @@ const Client = () => {
             </div>
           </div>
 
-
           {/* ================= APP DOWNLOAD SECTION ================= */}
-          {/* ===== DOWNLOAD APP SECTION ===== */}
           <div className="download-app-simple">
             <span className="download-text">
               📱 Download our mobile app for faster booking
             </span>
 
             <a
-              target='_blank'
-              href={"/https://drive.google.com/file/d/1CjoY8xiDyaqKYJyH2h4-IwXJnMFrypZW/view?usp=sharing"}
-              download
+              href="https://drive.google.com/uc?export=download&id=1CjoY8xiDyaqKYJyH2h4-IwXJnMFrypZW"
               className="download-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+              download
             >
               ⬇ Download App
             </a>
           </div>
+
 
 
         </div>
@@ -722,6 +814,68 @@ const Client = () => {
           </div>
         </>}
 
+        {/* EMI WORKFLOW PAGES */}
+        {currentBookingModel && <>
+          <div id="emi-details-page" className={`page ${activePage === 'emi-details-page' ? 'active' : ''}`}>
+            <button onClick={() => showPage('home-page')} className="btn-back">← Back to Home</button>
+            <h2>EMI Purchase</h2>
+            <div className="netpay-details">
+              <h3>{currentBookingModel.model}</h3>
+              <img src={currentBookingModel.image} alt="Product Image" className="netpay-product-image" />
+              <h4>Item Full Details:</h4>
+              <p className="item-specs">{currentBookingModel.fullSpecs || 'No details available.'}</p>
+              <h3 className="netpay-price">Netpay Price: INR {currentBookingModel.netpayPrice}</h3>
+            </div>
+
+            <h3>Choose EMI Plan</h3>
+            <form onSubmit={(e) => { e.preventDefault(); submitEmiForm(); }} className="netpay-form">
+              <div className="form-group">
+                <label>Available Plans (months):</label>
+                <select value={emiSelectedMonths} onChange={(e) => setEmiSelectedMonths(e.target.value)}>
+                  <option value="">Select a plan</option>
+                  {(currentBookingModel.emiMonths || '').toString().split(',').map((m, idx) => m.trim() && <option key={idx} value={m.trim()}>{m.trim()} months</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Down Payment (INR):</label>
+                <input type="number" value={emiDownPaymentInput} onChange={(e) => setEmiDownPaymentInput(e.target.value)} placeholder={currentBookingModel.downPaymentAmount || '0'} />
+              </div>
+
+              <div className="form-group">
+                <label>Customer Name:</label>
+                <input type="text" value={netpayForm.name} onChange={handleNetpayFormChange} id="netpay-user-name" required />
+              </div>
+              <div className="form-group">
+                <label>Mobile Number:</label>
+                <input type="text" value={netpayForm.mobile} onChange={handleNetpayFormChange} id="netpay-user-mobile" required />
+              </div>
+              <div className="form-group">
+                <label>Home Address:</label>
+                <textarea rows="3" value={netpayForm.address} onChange={handleNetpayFormChange} id="netpay-user-address" required></textarea>
+              </div>
+
+              <button type="button" onClick={submitEmiForm} className="btn-primary">Proceed to Payment (QR)</button>
+            </form>
+          </div>
+
+          <div id="emi-qr-page" className={`page ${activePage === 'emi-qr-page' ? 'active' : ''}`}>
+            <button onClick={() => showPage('emi-details-page')} className="btn-back">← Back</button>
+            <h2>Scan to Pay (INR {currentBookingModel.netpayPrice})</h2>
+            <img src={currentBookingModel.netpayQrCode} alt="QR Code" className="qr-code-image" />
+            <p className="qr-instruction">Please complete the payment and upload a screenshot of your payment confirmation below.</p>
+            <div className="form-group">
+              <label htmlFor="emi-screenshot-upload">Upload Screenshot:</label>
+              <input type="file" id="emi-screenshot-upload" accept="image/*" ref={netpayScreenshotRef} required />
+            </div>
+            <button onClick={confirmEmi} disabled={confirmingEmi} className="btn-primary">
+              {confirmingEmi ? (
+                <span className="button-loader">
+                  <div className="spinner-small"></div> Processing...
+                </span>) : ("Confirm EMI Order & Upload Payment")}
+            </button>
+          </div>
+        </>}
+
         {/* ORDER SUCCESS POPUP */}
         {orderSuccessPopup && (
           <div style={popupOverlayStyle}>
@@ -761,7 +915,7 @@ const Client = () => {
       </div>
 
       <a
-        href="https://wa.me/919876543210"
+        href="https://wa.me/9123585348"
         target="_blank"
         rel="noopener noreferrer"
         className="whatsapp-float"

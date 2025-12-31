@@ -51,6 +51,8 @@ create table public.products (
   image_url text null,
   netpay_qr_url text null,
   created_at timestamp with time zone null default now(),
+  emi_months text null,
+  down_payment_amount numeric(10, 2) null default 0,
   constraint products_pkey primary key (id),
   constraint products_category_check check (
     (

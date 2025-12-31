@@ -63,6 +63,8 @@ export const AdminDataProvider = ({ children }) => {
         netpayQrCode: p.netpayQrCode,
         imageFile: null,
         netpayQrCodeFile: null,
+        emiMonths: p.emiMonths || '',
+        downPaymentAmount: p.downPaymentAmount || null,
         createdAt: p.createdAt
     });
 
@@ -228,6 +230,8 @@ export const AdminDataProvider = ({ children }) => {
             netpayQrCode: '',
             imageFile: null,
             netpayQrCodeFile: null
+            , emiMonths: '',
+            downPaymentAmount: null
         };
         category === 'precious' ? setPreciousItems(prev => [...prev, newItem]) : setOtherItems(prev => [...prev, newItem]);
     };
@@ -360,6 +364,8 @@ export const AdminDataProvider = ({ children }) => {
                 formData.append('offer', toNumberOrNull(item.offer));
                 formData.append('offerTime', item.offerTime || '');
                 formData.append('fullSpecs', item.fullSpecs || '');
+                formData.append('emiMonths', item.emiMonths || '');
+                formData.append('downPaymentAmount', toNumberOrNull(item.downPaymentAmount));
                 if (item.imageFile) formData.append('imageFile', item.imageFile);
                 if (item.netpayQrCodeFile) formData.append('netpayQrCodeFile', item.netpayQrCodeFile);
                 await axiosInstance.post('/products/admin', formData, { headers: { 'Content-Type': 'multipart/form-data' } });

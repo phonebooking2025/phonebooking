@@ -960,3 +960,100 @@ input {
         text-align: left;
     }
 }
+
+.floating-save-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    background-color: #2D9966;
+    color: #fff;
+    border: none;
+    padding: 8px 25px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    z-index: 9999;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.floating-save-btn:hover {
+    transform: scale(1.05);
+}
+
+/* ============================================================================
+   ADVERTISEMENT VIDEO DISPLAY STYLES
+   ============================================================================ */
+
+.ad-video-display-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 2px solid #1D4ED8;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ad-video-display-title {
+    color: #1D4ED8;
+    font-size: 1.2em;
+    font-weight: 700;
+    margin: 0;
+    text-align: center;
+}
+
+.ad-video-preview {
+    width: 100%;
+    max-height: 400px;
+    border-radius: 8px;
+    border: 2px solid #1D4ED8;
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.15);
+}
+
+.ad-video-info {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #1D4ED8;
+}
+
+.ad-video-url-label {
+    color: #264D59;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    font-size: 0.95em;
+}
+
+.ad-video-url-display {
+    color: #1D4ED8;
+    font-weight: 500;
+    margin: 0;
+    padding: 10px;
+    background: #f0f9ff;
+    border-radius: 6px;
+    word-break: break-all;
+    font-size: 0.9em;
+}
+
+/* Responsive Styles for Advertisement Video */
+@media (max-width: 768px) {
+    .ad-video-display-section {
+        padding: 15px;
+        gap: 12px;
+    }
+
+    .ad-video-preview {
+        max-height: 300px;
+    }
+
+    .ad-video-display-title {
+        font-size: 1.1em;
+    }
+}

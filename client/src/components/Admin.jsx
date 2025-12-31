@@ -116,6 +116,23 @@ const AdminContent = () => {
 
     const navigate = useNavigate();
 
+
+    const [showFloatingSave, setShowFloatingSave] = useState(false);
+
+    React.useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 1500) {
+                setShowFloatingSave(true);
+            } else {
+                setShowFloatingSave(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
     // Consume state and actions from the context
     const {
         preciousItems,
@@ -334,6 +351,57 @@ const AdminContent = () => {
                             (Video upload less than 1 or 2 minute)
                         </span>
                     </div>
+
+                    {/* --- Advertisement Video Display --- */}
+                    {(settings.advertisementVideoUrl || settings.advertisementVideoFile) && (
+                        <div className="ad-video-display-section">
+                            <h3 className="ad-video-display-title">📹 Current Advertisement Video</h3>
+
+                            {settings.advertisementVideoFile && (
+                                <video
+                                    controls
+                                    className="ad-video-preview"
+                                    style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "400px",
+                                        borderRadius: "8px",
+                                        marginBottom: "15px",
+                                        border: "2px solid #1D4ED8"
+                                    }}
+                                >
+                                    <source src={URL.createObjectURL(settings.advertisementVideoFile)} type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                </video>
+                            )}
+
+                            {settings.advertisementVideoUrl && !settings.advertisementVideoFile && (
+                                <video
+                                    controls
+                                    className="ad-video-preview"
+                                    style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "400px",
+                                        borderRadius: "8px",
+                                        marginBottom: "15px",
+                                        border: "2px solid #1D4ED8"
+                                    }}
+                                >
+                                    <source src={settings.advertisementVideoUrl} type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                </video>
+                            )}
+
+                            <div className="ad-video-info">
+                                <p className="ad-video-url-label"><strong>Video URL/Name:</strong></p>
+                                <p className="ad-video-url-display">
+                                    {settings.advertisementVideoFile
+                                        ? `📄 ${settings.advertisementVideoFile.name}`
+                                        : settings.advertisementVideoUrl
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
 
@@ -396,6 +464,25 @@ const AdminContent = () => {
                                         onChange={(e) =>
                                             handleProductChange(index, "netpayPrice", e.target.value, "precious")
                                         }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>EMI Plans (months, comma separated)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. 3,6,9"
+                                        value={item.emiMonths || ""}
+                                        onChange={(e) => handleProductChange(index, "emiMonths", e.target.value, "precious")}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Down Payment Amount (INR)</label>
+                                    <input
+                                        type="number"
+                                        value={item.downPaymentAmount || ""}
+                                        onChange={(e) => handleProductChange(index, "downPaymentAmount", e.target.value, "precious")}
                                     />
                                 </div>
 
@@ -562,6 +649,25 @@ const AdminContent = () => {
                                                 "other"
                                             )
                                         }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>EMI Plans (months, comma separated)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. 3,6,9"
+                                        value={item.emiMonths || ""}
+                                        onChange={(e) => handleProductChange(index, "emiMonths", e.target.value, "other")}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Down Payment Amount (INR)</label>
+                                    <input
+                                        type="number"
+                                        value={item.downPaymentAmount || ""}
+                                        onChange={(e) => handleProductChange(index, "downPaymentAmount", e.target.value, "other")}
                                     />
                                 </div>
 
@@ -771,6 +877,18 @@ const AdminContent = () => {
                     </button>
                 </div>
             </div>
+
+            {showFloatingSave && (
+                <button
+                    className="floating-save-btn"
+                    onClick={saveAllChanges}
+                    title="Save All Changes"
+                >
+                    <FiSave size={20} />
+                    Save
+                </button>
+            )}
+
         </>
     );
 };

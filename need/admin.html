@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - B1G1 Timer Update</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        .form-section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; background: #fff; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .form-group input, textarea, select { width: 100%; padding: 8px; border: 1px solid #aaa; border-radius: 4px; }
+        .btn { padding: 10px 20px; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        .save-btn { background: #28a745; width: 100%; font-size: 1.2em; }
+        .add-btn { background: #007bff; margin-top: 10px; }
+        .del-btn { background: #dc3545; float: right; padding: 5px 10px; }
+        
+        .settings-box { background: #e3f2fd; border: 2px dashed #2196f3; padding: 15px; margin-bottom: 30px; border-radius: 10px; }
+        .settings-box img { max-width: 100px; margin: 10px auto; display: block; }
+        .sub-head { color: #2196f3; border-bottom: 1px solid #2196f3; padding-bottom: 5px; margin-bottom: 10px; margin-top: 20px; }
+        .media-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; background: white; display: flex; align-items: center; justify-content: space-between; }
+        .media-preview { height: 50px; width: auto; object-fit: cover; }
+
+        .order-card { border: 1px solid #333; padding: 10px; margin-bottom: 10px; background: #f9f9f9; }
+        .badge { display: inline-block; padding: 5px; color: white; border-radius: 4px; font-size: 0.8em; }
+        .pending { background: orange; }
+        .confirmed { background: green; }
+        .chat-card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; background: #fff; border-left: 5px solid #007bff; }
+        .reply-box { margin-top: 5px; display: flex; gap: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align:center;">Admin Control</h1>
+
+        <div class="settings-box">
+            <h3>App Visuals & Settings</h3>
+            
+            <div class="form-group" style="border-bottom:1px solid #ccc; padding-bottom:15px;">
+                <label>Upload App Logo:</label>
+                <input type="file" id="app-logo-input" accept="image/*">
+                <img id="current-logo-view" src="" alt="No Logo Set">
+                <button class="btn" style="background:#2196f3; margin-top:5px;" onclick="saveLogo()">Update Logo</button>
+            </div>
+
+            <div class="form-group" style="border-bottom:1px solid #ccc; padding-bottom:15px; margin-top:15px;">
+                <h4 class="sub-head">WhatsApp Support Number</h4>
+                <label>Enter WhatsApp Number (with Country Code, No + symbol):</label>
+                <input type="number" id="whatsapp-num-input" placeholder="e.g. 919876543210">
+                <button class="btn" style="background:#2196f3; margin-top:10px;" onclick="saveWhatsApp()">Save WhatsApp Number</button>
+            </div>
+
+            <div class="form-group" style="border-bottom:1px solid #ccc; padding-bottom:15px; margin-top:15px;">
+                <h4 class="sub-head">Header Background (Booking Now)</h4>
+                
+                <label>Header Image (Up to 5MB):</label>
+                <input type="file" id="head-bg-input" accept="image/*">
+                <img id="current-head-bg" src="" style="height:80px; display:block; margin:10px 0; border:1px solid #333;" alt="No Header BG">
+                
+                <label style="margin-top:10px;">Opacity (Visibility Level): <span id="op-val-disp">0.5</span></label>
+                <input type="range" id="head-op-input" min="0" max="1" step="0.1" value="0.5" oninput="document.getElementById('op-val-disp').innerText = this.value">
+                <small>0 = Invisible (Color only), 1 = Full Image</small>
+                
+                <br>
+                <button class="btn" style="background:#2196f3; margin-top:10px;" onclick="saveHeaderBg()">Update Header Settings</button>
+            </div>
+
+            <h4 class="sub-head">Header Banners (Slideshow)</h4>
+            <div id="banner-list"></div>
+            <button class="btn add-btn" onclick="addBannerInput()">+ Banner Add More</button>
+            
+            <h4 class="sub-head">Home Page Videos</h4>
+            <div id="video-list"></div>
+            <button class="btn add-btn" onclick="addVideoInput()">+ Video Add More</button>
+        </div>
+
+        <h2>Mobile Items</h2>
+        <div id="mob-forms"></div>
+        <button class="btn add-btn" onclick="addForm('mob-forms')">+ Add Mobile</button>
+
+        <h2 style="margin-top:30px;">Other Items</h2>
+        <div id="home-forms"></div>
+        <button class="btn add-btn" onclick="addForm('home-forms')">+ Add Other Item</button>
+
+        <br><br>
+        <button class="btn save-btn" onclick="saveAll()">SAVE ALL CHANGES</button>
+
+        <h2 style="margin-top:40px; border-top:2px solid #333; padding-top:20px;">Customer Orders</h2>
+        <div id="orders-list"></div>
+
+        <h2 style="margin-top:40px; border-top:2px solid #333; padding-top:20px;">User Messages (Chat)</h2>
+        <div id="chat-list"></div>
+    </div>
+
+    <script>
+        const KEYS = { 
+            MOB: 'admin_mobiles_data', HOME: 'admin_home_appliances_data', NP: 'user_netpay_sales', EMI: 'user_emi_sales', 
+            LOGO: 'admin_app_logo', CHAT: 'app_chat_data', BANNERS: 'admin_banners_data', VIDEOS: 'admin_promo_videos_data',
+            HEAD_BG: 'admin_header_bg', HEAD_OP: 'admin_header_opacity',
+            WHATSAPP: 'admin_whatsapp_number'
+        };
+
+        function init() {
+            renderForms(KEYS.MOB, 'mob-forms');
+            renderForms(KEYS.HOME, 'home-forms');
+            renderOrders();
+            renderChat();
+            loadLogo();
+            renderBanners(); 
+            renderVideos();
+            loadHeaderSettings();
+            loadWhatsApp();
+        }
+
+        // --- Logo & Header Logic ---
+        function loadLogo() {
+            const savedLogo = localStorage.getItem(KEYS.LOGO);
+            if(savedLogo) document.getElementById('current-logo-view').src = savedLogo;
+        }
+
+        async function saveLogo() {
+            const fileInput = document.getElementById('app-logo-input');
+            if (fileInput.files && fileInput.files[0]) {
+                const base64 = await readFile(fileInput.files[0]);
+                try { localStorage.setItem(KEYS.LOGO, base64); document.getElementById('current-logo-view').src = base64; alert('Logo Updated!'); } 
+                catch(e) { alert("File too large!"); }
+            }
+        }
+
+        function loadWhatsApp() {
+            const num = localStorage.getItem(KEYS.WHATSAPP);
+            if(num) document.getElementById('whatsapp-num-input').value = num;
+        }
+
+        function saveWhatsApp() {
+            const num = document.getElementById('whatsapp-num-input').value;
+            localStorage.setItem(KEYS.WHATSAPP, num);
+            alert("WhatsApp Number Saved!");
+        }
+
+        function loadHeaderSettings() {
+            const bg = localStorage.getItem(KEYS.HEAD_BG);
+            const op = localStorage.getItem(KEYS.HEAD_OP) || '0.5';
+            if(bg) document.getElementById('current-head-bg').src = bg;
+            document.getElementById('head-op-input').value = op;
+            document.getElementById('op-val-disp').innerText = op;
+        }
+
+        async function saveHeaderBg() {
+            const fileInput = document.getElementById('head-bg-input');
+            const opacity = document.getElementById('head-op-input').value;
+            try {
+                localStorage.setItem(KEYS.HEAD_OP, opacity);
+                if (fileInput.files && fileInput.files[0]) {
+                    const base64 = await readFile(fileInput.files[0]);
+                    localStorage.setItem(KEYS.HEAD_BG, base64);
+                    document.getElementById('current-head-bg').src = base64;
+                }
+                alert('Header Updated!');
+            } catch(e) { alert("File too large!"); }
+        }
+
+        // --- Banners & Videos Logic ---
+        function renderBanners() {
+            const banners = JSON.parse(localStorage.getItem(KEYS.BANNERS)) || [];
+            const container = document.getElementById('banner-list');
+            container.innerHTML = '';
+            banners.forEach(b => container.appendChild(createMediaInput(b, 'image')));
+        }
+        function addBannerInput() { document.getElementById('banner-list').appendChild(createMediaInput(null, 'image')); }
+
+        function renderVideos() {
+            const videos = JSON.parse(localStorage.getItem(KEYS.VIDEOS)) || [];
+            const container = document.getElementById('video-list');
+            container.innerHTML = '';
+            videos.forEach(v => container.appendChild(createMediaInput(v, 'video')));
+        }
+        function addVideoInput() { document.getElementById('video-list').appendChild(createMediaInput(null, 'video')); }
+
+        function createMediaInput(existingData, type) {
+            const div = document.createElement('div'); div.className = 'media-item';
+            const accept = type === 'image' ? 'image/*' : 'video/*';
+            const prevTag = type === 'image' ? `<img src="${existingData}" class="media-preview">` : `<span style="font-size:0.8em;">Video Loaded</span>`;
+            
+            div.innerHTML = `
+                <div>
+                    <input type="file" class="media-file" accept="${accept}">
+                    <input type="hidden" class="media-val" value="${existingData || ''}">
+                    ${existingData ? prevTag : '<small>New Entry</small>'}
+                </div>
+                <button class="btn del-btn" onclick="this.parentElement.remove()">Remove</button>
+            `;
+            return div;
+        }
+
+        // --- Product Logic ---
+        function renderForms(key, id) {
+            const data = JSON.parse(localStorage.getItem(key)) || [];
+            const con = document.getElementById(id); con.innerHTML = '';
+            if(!data.length) data.push({});
+            data.forEach(item => con.appendChild(createForm(item)));
+        }
+        function addForm(id) { document.getElementById(id).appendChild(createForm({})); }
+
+        function createForm(item) {
+            const div = document.createElement('div'); div.className = 'form-section';
+            
+            div.innerHTML = `
+                <button class="btn del-btn" onclick="this.parentElement.remove()">Delete</button>
+                <input type="hidden" class="p-id" value="${item.id || 'P'+Date.now()+Math.random()}">
+                <div class="form-group"><label>Model Name:</label><input class="p-mod" value="${item.model||''}"></div>
+                <div class="form-group"><label>Product Image:</label><input type="file" class="p-img-f"><input type="hidden" class="p-img-v" value="${item.image||''}"></div>
+                <div class="form-group"><label>Product Video:</label><input type="file" class="p-vid-f"><input type="hidden" class="p-vid-v" value="${item.video||''}"></div>
+                <div class="form-group"><label>QR Code:</label><input type="file" class="p-qr-f"><input type="hidden" class="p-qr-v" value="${item.netpayQrCode||''}"></div>
+                
+                <div class="form-group" style="background:#e3f2fd; padding:10px; border-radius:5px;">
+                    <label style="color:#1565c0;">Buy 1 Get 1 Free Offer:</label>
+                    <select class="p-b1g1">
+                        <option value="No" ${item.buyOneGetOne==='No'?'selected':''}>No</option>
+                        <option value="Yes" ${item.buyOneGetOne==='Yes'?'selected':''}>Yes</option>
+                    </select>
+                    
+                    <label style="color:#1565c0; margin-top:10px;">Offer End Date & Time (For Timer):</label>
+                    <input type="datetime-local" class="p-end-date" value="${item.offerEndTime||''}">
+                </div>
+
+                <div class="form-group"><label>Market Price:</label><input type="number" class="p-mkt" value="${item.bookingAmount||''}"></div>
+                <div class="form-group"><label>Netpay Price:</label><input type="number" class="p-net" value="${item.netpayPrice||''}"></div>
+                
+                <div class="form-group" style="background:#e8f5e9; padding:10px; border-radius:5px;">
+                    <label style="color:green;">Down Payment Amount (For EMI):</label>
+                    <input type="number" class="p-dp" value="${item.downPaymentAmount||''}" placeholder="Enter Down Payment Amount">
+                </div>
+
+                <div class="form-group"><label>Stock:</label><input class="p-stk" value="${item.stock||''}"></div>
+                <div class="form-group"><label>EMI Months:</label><input class="p-emi" value="${item.emiMonths||''}"></div>
+                <div class="form-group" style="background:#ffebee; padding:10px; border-radius:5px;"><label>Offer Percentage (Amazon Badge):</label><input class="p-off" value="${item.offer||''}" placeholder="e.g. 25% Off"></div>
+                <div class="form-group"><label>Details:</label><textarea class="p-desc">${item.fullSpecs||''}</textarea></div>
+            `;
+            return div;
+        }
+
+        async function saveAll() {
+            try {
+                await saveSec('mob-forms', KEYS.MOB);
+                await saveSec('home-forms', KEYS.HOME);
+                
+                // Save Banners
+                const bannerList = [];
+                for(const div of document.querySelectorAll('#banner-list .media-item')) {
+                    const file = div.querySelector('.media-file').files[0];
+                    const val = file ? await readFile(file) : div.querySelector('.media-val').value;
+                    if(val) bannerList.push(val);
+                }
+                localStorage.setItem(KEYS.BANNERS, JSON.stringify(bannerList));
+
+                // Save Videos
+                const videoList = [];
+                for(const div of document.querySelectorAll('#video-list .media-item')) {
+                    const file = div.querySelector('.media-file').files[0];
+                    const val = file ? await readFile(file) : div.querySelector('.media-val').value;
+                    if(val) videoList.push(val);
+                }
+                localStorage.setItem(KEYS.VIDEOS, JSON.stringify(videoList));
+
+                alert('Saved Successfully!'); 
+                location.reload();
+            } catch (e) {
+                console.error(e);
+                alert("Error: Files too large!");
+            }
+        }
+
+        async function saveSec(id, key) {
+            const items = [];
+            for(const sec of document.querySelectorAll(`#${id} .form-section`)) {
+                if(!sec.querySelector('.p-mod').value) continue;
+                items.push({
+                    id: sec.querySelector('.p-id').value,
+                    model: sec.querySelector('.p-mod').value,
+                    image: await getFile(sec, '.p-img-f', '.p-img-v'),
+                    video: await getFile(sec, '.p-vid-f', '.p-vid-v'),
+                    netpayQrCode: await getFile(sec, '.p-qr-f', '.p-qr-v'),
+                    
+                    // Saving B1G1 Value & Date
+                    buyOneGetOne: sec.querySelector('.p-b1g1').value, 
+                    offerEndTime: sec.querySelector('.p-end-date').value,
+
+                    bookingAmount: sec.querySelector('.p-mkt').value,
+                    netpayPrice: sec.querySelector('.p-net').value,
+                    downPaymentAmount: sec.querySelector('.p-dp').value,
+                    stock: sec.querySelector('.p-stk').value,
+                    emiMonths: sec.querySelector('.p-emi').value,
+                    offer: sec.querySelector('.p-off').value,
+                    fullSpecs: sec.querySelector('.p-desc').value
+                });
+            }
+            localStorage.setItem(key, JSON.stringify(items));
+        }
+        
+        async function getFile(p, f, v) { const file = p.querySelector(f).files[0]; return file ? await readFile(file) : p.querySelector(v).value; }
+        function readFile(f) { return new Promise(r=>{const rd=new FileReader(); rd.onload=e=>r(e.target.result); rd.readAsDataURL(f);}); }
+
+        // --- Orders Logic ---
+        function renderOrders() {
+            const list = document.getElementById('orders-list'); list.innerHTML = '';
+            const all = [...(JSON.parse(localStorage.getItem(KEYS.NP))||[]), ...(JSON.parse(localStorage.getItem(KEYS.EMI))||[])];
+            all.forEach(o => {
+                const isEmi = o.months ? true : false;
+                list.innerHTML += `
+                <div class="order-card">
+                    <h3>${o.model} (${isEmi ? 'EMI' : 'Netpay'})</h3>
+                    <p>Status: <span class="badge ${o.status==='Confirmed'?'confirmed':'pending'}">${o.status||'Pending'}</span></p>
+                    <p>Name: ${o.name} | Mobile: ${o.mobile}</p>
+                    <p>Address: ${o.address}</p>
+                    ${isEmi ? `<p>Down Pay: ₹${o.downPayment} | Bank: ${o.bankDetails} | ID: ${o.aadhar}</p>` : `<p>Price: ₹${o.price}</p>`}
+                    <div style="display:flex; gap:10px;">
+                        <div>SS:<br><img src="${o.screenshot}" style="width:50px;"></div>
+                        ${o.userPhoto ? `<div>User Photo:<br><img src="${o.userPhoto}" style="width:50px;"></div>` : ''}
+                    </div>
+                    ${o.status !== 'Confirmed' ? `<button class="btn save-btn" style="margin-top:10px; width:auto;" onclick="confirm('${o.id}', '${isEmi?'EMI':'NP'}')">Confirm Order</button>` : `<p style="color:green; font-weight:bold;">Delivery Date: ${new Date(o.deliveryDate).toDateString()}</p>`}
+                </div>`;
+            });
+        }
+
+        function confirm(id, type) {
+            const key = type === 'NP' ? KEYS.NP : KEYS.EMI;
+            const ls = JSON.parse(localStorage.getItem(key));
+            const idx = ls.findIndex(x => x.id == id);
+            const days = type === 'NP' ? 19 : 25;
+            const d = new Date(); d.setDate(d.getDate() + days);
+            ls[idx].status = 'Confirmed';
+            ls[idx].deliveryDate = d.toISOString();
+            localStorage.setItem(key, JSON.stringify(ls));
+            renderOrders();
+        }
+
+        // --- Chat Logic ---
+        function renderChat() {
+            const list = document.getElementById('chat-list');
+            const chats = JSON.parse(localStorage.getItem(KEYS.CHAT)) || [];
+            list.innerHTML = '';
+            chats.reverse().forEach((c, index) => {
+                const realIndex = chats.length - 1 - index;
+                list.innerHTML += `
+                <div class="chat-card">
+                    <p><strong>User:</strong> ${c.message}</p>
+                    <small style="color:#666;">${c.time}</small>
+                    <div style="margin-top:5px; padding-top:5px; border-top:1px dashed #ccc;">
+                        <strong>Admin Reply:</strong> ${c.reply || '<span style="color:red">Not replied yet</span>'}
+                    </div>
+                    <div class="reply-box">
+                        <input type="text" id="reply-inp-${realIndex}" placeholder="Type reply..." value="${c.reply||''}">
+                        <button class="btn" style="background:#007bff; padding:5px;" onclick="saveReply(${realIndex})">Send</button>
+                    </div>
+                </div>`;
+            });
+        }
+        function saveReply(index) {
+            const chats = JSON.parse(localStorage.getItem(KEYS.CHAT)) || [];
+            chats[index].reply = document.getElementById(`reply-inp-${index}`).value;
+            localStorage.setItem(KEYS.CHAT, JSON.stringify(chats));
+            alert('Reply sent!'); renderChat();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

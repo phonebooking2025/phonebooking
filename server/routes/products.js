@@ -87,6 +87,8 @@ router.post(
                 full_specs: fullSpecs || existing?.full_specs || null,
                 image_url,
                 netpay_qr_url,
+                emi_months: req.body.emiMonths || existing?.emi_months || null,
+                down_payment_amount: req.body.downPaymentAmount ? parseFloat(req.body.downPaymentAmount) : (existing?.down_payment_amount || null),
             };
 
             if (id) productObj.id = id;
@@ -128,6 +130,8 @@ router.get("/:category", async (req, res) => {
             fullSpecs: p.full_specs,
             image: p.image_url,
             netpayQrCode: p.netpay_qr_url,
+            emiMonths: p.emi_months || '',
+            downPaymentAmount: p.down_payment_amount || null,
             createdAt: p.created_at,
         }));
 
