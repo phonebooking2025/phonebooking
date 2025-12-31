@@ -101,9 +101,9 @@ export const AdminDataProvider = ({ children }) => {
             const [preciousRes, otherRes, salesRes, settingsRes, messagesRes,] = await Promise.all([
                 axiosInstance.get('/products/precious'),
                 axiosInstance.get('/products/other'),
-                axiosInstance.get('/public/orders'),
+                axiosInstance.get('/admin/orders'),
                 axiosInstance.get('/settings'),
-                axiosInstance.get('/public/orders'),
+                axiosInstance.get('/admin/messages/latest-per-user'),
             ]);
 
             setPreciousItems((preciousRes.data || []).map(mapProductFromDb));
