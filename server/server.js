@@ -21,7 +21,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = express();
 
 // ============ MIDDLEWARE ============
-const allowedOrigins = ["http://localhost:5173", "https://phonebooking.in", "https://phonebooking-client.vercel.app"];
+const allowedOrigins = ["http://localhost:5173", "https://phonebooking.in", "https://phonebooking-client.vercel.app", "https://phonebooking.vercel.app"];
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: "50mb" }));
 
