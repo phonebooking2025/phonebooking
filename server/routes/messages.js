@@ -29,7 +29,7 @@ router.post("/send", verifyToken, async (req, res) => {
 
 // ============ GET LATEST MESSAGE (ADMIN) ============
 router.get(
-    "/admin/latest",
+    "/latest",
     verifyToken,
     requireAdmin,
     async (req, res) => {
@@ -53,7 +53,7 @@ router.get(
 
 // ============ ADMIN REPLY ============
 router.post(
-    "/admin/reply/:user_id",
+    "/reply/:user_id",
     verifyToken,
     requireAdmin,
     async (req, res) => {
