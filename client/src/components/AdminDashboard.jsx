@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, AuthProvider } from "../context/AuthContext";
 import { useAdminData, AdminDataProvider } from "../context/AdminContext";
@@ -52,6 +52,8 @@ const DashboardContent = () => {
     handleSettingsChange, handleBannerFileChange, addBannerInput, deleteBanner,
     confirmNetpayDelivery, sendSmsToUser, saveAllChanges
   } = useAdminData() || {};
+
+  const saveTimeoutRef = useRef(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -147,6 +149,16 @@ const DashboardContent = () => {
               <div className="form-group">
                 <label>Header Title</label>
                 <input value={settings.headerTitle || ''} onChange={e => handleSettingsChange('headerTitle', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>WhatsApp Number</label>
+                <input value={settings.whatsappNumber || ''} onChange={e => {
+                  handleSettingsChange('whatsappNumber', e.target.value);
+                  if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+                  saveTimeoutRef.current = setTimeout(() => {
+                    saveAllChanges();
+                  }, 1000);
+                }} />
               </div>
             </div>
           )}

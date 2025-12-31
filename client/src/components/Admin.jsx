@@ -149,6 +149,7 @@ const AdminContent = () => {
         handleBannerFileChange,
         addBannerInput,
         deleteBanner,
+        updateWhatsAppNumber,
         confirmNetpayDelivery,
         sendSmsToUser,
         saveAllChanges,
@@ -270,6 +271,28 @@ const AdminContent = () => {
                                 }
                             />
                         </div>
+
+                        {/* WhatsApp Number (Admin editable) */}
+                        <div className="form-group">
+                            <label htmlFor="whatsapp-number">WhatsApp Number (for client chat):</label>
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }} className="whatsapp-contain">
+                                <input
+                                    type="text"
+                                    id="whatsapp-number"
+                                    placeholder="e.g. 919876543210"
+                                    value={settings.whatsappNumber || ""}
+                                    onChange={(e) => handleSettingsChange('whatsappNumber', e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn-save-whatsapp"
+                                    onClick={() => updateWhatsAppNumber(settings.whatsappNumber)}
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Banner Section */}

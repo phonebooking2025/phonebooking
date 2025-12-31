@@ -91,7 +91,7 @@ router.post(
             const bannerFiles = req.files?.bannerFiles || [];
             const advertisementVideoFile = req.files?.advertisementVideoFile?.[0];
 
-            let { header_title, company_logo_url, delivery_image_url, banners } =
+            let { header_title, company_logo_url, delivery_image_url, banners, whatsapp_number } =
                 req.body;
 
             const { data: existingSettings } = await supabase
@@ -147,6 +147,7 @@ router.post(
                 delivery_image_url,
                 banners: bannerArray,
                 advertisement_video_url,
+                whatsapp_number: whatsapp_number || existingSettings?.whatsapp_number || null,
             };
 
             const { data, error } = await supabase

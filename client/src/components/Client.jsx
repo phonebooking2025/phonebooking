@@ -653,7 +653,7 @@ const Client = () => {
       <div className="container client-container">
         {/* HOME PAGE */}
         <div id="home-page" className={`page ${activePage === 'home-page' ? 'active' : ''}`}>
-         {/* Product Grid Container */}
+          {/* Product Grid Container */}
           <div className="product-sections-container">
             <div className="product-section left-section">
               <h2 className="section-title items-section">Mobile Items</h2>
@@ -915,15 +915,27 @@ const Client = () => {
         </div>
       </div>
 
-      <a
-        href="https://wa.me/9123585348"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="whatsapp-float"
-        aria-label="Chat on WhatsApp"
-      >
-        <FaWhatsapp className="whatsapp-icon" />
-      </a>
+      {
+        (() => {
+          let wa = settings?.whatsappNumber;
+          if (!wa) {
+            try {
+              const cached = JSON.parse(localStorage.getItem('website_settings')) || null;
+              wa = cached?.whatsappNumber || '';
+            } catch (e) {
+              wa = '';
+            }
+          }
+          wa = wa || '9123585348';
+          const cleaned = String(wa).replace(/[^0-9]/g, '');
+          const href = `https://wa.me/${cleaned}`;
+          return (
+            <a href={href} target="_blank" rel="noopener noreferrer" className="whatsapp-float" aria-label="Chat on WhatsApp">
+              <FaWhatsapp className="whatsapp-icon" />
+            </a>
+          );
+        })()
+      }
 
 
       {/* FOOTER */}

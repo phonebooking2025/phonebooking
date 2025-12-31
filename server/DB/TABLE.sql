@@ -64,6 +64,7 @@ create table public.products (
 create table public.settings (
   id uuid not null default '00000000-0000-0000-0000-000000000001'::uuid,
   header_title text null,
+  whatsapp_number text null,
   company_logo_url text null,
   delivery_image_url text null,
   banners jsonb null,

@@ -36,6 +36,7 @@ export const AdminDataProvider = ({ children }) => {
     const [settings, setSettings] = useState({
         id: null,
         headerTitle: '',
+        whatsappNumber: '',
         companyLogo: '',
         deliveryImage: '',
         banners: [],
@@ -84,6 +85,7 @@ export const AdminDataProvider = ({ children }) => {
     const mapSettingsFromDb = (s) => ({
         id: s.id || null,
         headerTitle: s.header_title || '',
+        whatsappNumber: s.whatsapp_number || '',
         companyLogo: s.company_logo_url || '',
         deliveryImage: s.delivery_image_url || '',
         banners: (s.banners || []).map(url => ({ path: url, newFile: null })),
@@ -114,6 +116,7 @@ export const AdminDataProvider = ({ children }) => {
 
             const fetchedSettings = mapSettingsFromDb(settingsRes.data || {});
             setSettings(fetchedSettings);
+            try { localStorage.setItem('website_settings', JSON.stringify(fetchedSettings)); } catch (e) { }
 
             // Corrected latest message mapping
             const latestMessagesArray = messagesRes.data?.latestMessages || [];
@@ -165,6 +168,7 @@ export const AdminDataProvider = ({ children }) => {
 
             const fetchedSettings = mapSettingsFromDb(settingsRes.data || {});
             setSettings(fetchedSettings);
+            try { localStorage.setItem('website_settings', JSON.stringify(fetchedSettings)); } catch (e) { }
 
             const latestMessagesArray = messagesRes.data?.latestMessages || [];
             if (latestMessagesArray.length > 0) {
@@ -331,6 +335,7 @@ export const AdminDataProvider = ({ children }) => {
             const settingsFormData = new FormData();
             settingsFormData.append('id', settings.id || '');
             settingsFormData.append('header_title', settings.headerTitle || '');
+            settingsFormData.append('whatsapp_number', settings.whatsappNumber || '');
             if (settings.companyLogoFile) settingsFormData.append('companyLogoFile', settings.companyLogoFile);
             if (settings.deliveryImageFile) settingsFormData.append('deliveryImageFile', settings.deliveryImageFile);
             if (settings.advertisementVideoFile) { settingsFormData.append('advertisementVideoFile', settings.advertisementVideoFile); }
@@ -382,6 +387,24 @@ export const AdminDataProvider = ({ children }) => {
         }
     };
 
+    // ------------------ UPDATE ONLY WHATSAPP NUMBER ------------------
+    const updateWhatsAppNumber = async (number) => {
+        setLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append('id', settings.id || '');
+            formData.append('whatsapp_number', number || '');
+            await axiosInstance.post('/admin/settings', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await fetchAdminData();
+            toast.success('WhatsApp number updated');
+        } catch (err) {
+            console.error('Update WhatsApp error:', err);
+            toast.error(err.response?.data?.message || 'Failed to update WhatsApp number');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // ------------------ CONTEXT VALUE ------------------
     const contextValue = {
         preciousItems,
@@ -400,6 +423,7 @@ export const AdminDataProvider = ({ children }) => {
         handleBannerFileChange,
         addBannerInput,
         deleteBanner,
+        updateWhatsAppNumber,
         confirmNetpayDelivery,
         sendSmsToUser,
         saveAllChanges,
