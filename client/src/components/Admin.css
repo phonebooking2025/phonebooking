@@ -64,6 +64,26 @@ h2 {
         grid-template-columns: repeat(1, auto);
         gap: 10px;
     }
+
+}
+
+
+@media (max-width:360px) {
+
+    .admin-form-container .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 6px !important;
+        margin-left: -18px !important;
+        background: rgba(209, 192, 255, 0.178);
+        border: 1px dashed #767ff8;
+    }
+
+    .admin-form-container .form-group input {
+        width: 200px !important;
+    }
+
 }
 
 /* Laptop / Desktop */
@@ -83,6 +103,11 @@ h2 {
 }
 
 .input,
+input[type="text"],
+input[type="number"],
+input[type="time"],
+input[type="date"],
+input[type="datetime-local"],
 textarea {
     box-sizing: border-box;
     width: 100%;
@@ -90,12 +115,24 @@ textarea {
     border: 1px solid #e0e6e6;
     border-radius: 8px;
     background: white;
-    color: #123
+    color: #123;
+    font-size: 14px;
+    font-family: inherit;
 }
 
 textarea {
     min-height: 80px;
     resize: vertical
+}
+
+/* Constrain datetime-local picker to prevent overflow */
+input[type="datetime-local"],
+input[type="time"],
+input[type="date"] {
+    min-height: 40px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .thumb {
@@ -888,9 +925,9 @@ input {
 
 .ad-video-admin-section {
     margin-top: 20px;
-    border: 2px dashed #4F46E5;
+    border: 1px dashed #4F46E5;
     border-radius: 10px;
-    background: #F9FAFB;
+    background: #F9FAFB80;
     padding: 16px;
 }
 
@@ -993,8 +1030,8 @@ input {
 .ad-video-display-section {
     margin-top: 20px;
     padding: 20px;
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border: 2px solid #1D4ED8;
+    background: linear-gradient(135deg, #f0f9ff60 0%, #e0f2fe60 100%);
+    border: 1.5px solid #1D4ED860;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -1067,7 +1104,8 @@ input {
     justify-content: center;
     gap: 10px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #25D366, #128C7E); /* WhatsApp Green Gradient */
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    /* WhatsApp Green Gradient */
     color: #ffffff;
     font-size: 15px;
     font-weight: 600;
@@ -1100,7 +1138,7 @@ input {
 
 
 @media (max-width:678px) {
-    .whatsapp-contain{
+    .whatsapp-contain {
         display: flex;
         flex-direction: column;
     }

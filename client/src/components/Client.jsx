@@ -43,13 +43,22 @@ function getLocalStorageData(key) {
 // ==================== TIME & OFFER UTILITIES ====================
 /**
  * Calculate offer end time based on offer time string
- * @param {string} offerTime - Time in HH:MM format
+ * @param {string} offerTime - DateTime in format "YYYY-MM-DDTHH:MM" or ISO timestamp
  * @returns {Date|null} - End time or null if invalid
  */
 const getOfferEndTime = (offerTime) => {
   if (!offerTime) return null;
-  const [hours, minutes] = offerTime.split(':').map(Number);
 
+  // Handle datetime-local format (YYYY-MM-DDTHH:MM)
+  if (offerTime.includes('T')) {
+    const dt = new Date(offerTime);
+    if (!isNaN(dt.getTime())) {
+      return dt;
+    }
+  }
+
+  // Fallback for old HH:MM format (if any data exists)
+  const [hours, minutes] = offerTime.split(':').map(Number);
   const now = new Date();
   let todayEndTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
 
@@ -749,8 +758,6 @@ const Client = () => {
               ⬇ Download App
             </a>
           </div>
-
-
 
         </div>
         {/*------------------- HOME PAGE END ------------------- */}

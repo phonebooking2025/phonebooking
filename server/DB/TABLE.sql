@@ -46,13 +46,13 @@ create table public.products (
   booking_amount numeric(10, 2) null,
   netpay_price numeric(10, 2) null,
   offer integer null,
-  offer_time time without time zone null,
   full_specs text null,
   image_url text null,
   netpay_qr_url text null,
   created_at timestamp with time zone null default now(),
   emi_months text null,
   down_payment_amount numeric(10, 2) null default 0,
+  offer_time timestamp with time zone null,
   constraint products_pkey primary key (id),
   constraint products_category_check check (
     (

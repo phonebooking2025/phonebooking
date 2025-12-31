@@ -445,7 +445,7 @@ const AdminContent = () => {
 
                             <h3>Precious Metal Item {index + 1}</h3>
 
-                            <div className="form-container">
+                            <div className="form-container admin-form-container">
                                 <div className="form-group">
                                     <label>Item Name</label>
                                     <input
@@ -523,9 +523,9 @@ const AdminContent = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Offer End Time</label>
+                                    <label>Offer End (date & time)</label>
                                     <input
-                                        type="time"
+                                        type="datetime-local"
                                         value={item.offerTime || ""}
                                         onChange={(e) =>
                                             handleProductChange(index, "offerTime", e.target.value, "precious")
@@ -535,7 +535,7 @@ const AdminContent = () => {
                             </div>
 
                             {/* Images */}
-                            <div className="form-container">
+                            <div className="form-container admin-form-container">
                                 <div className="form-group">
                                     <label>Item Image</label>
                                     {(item.image || item.imageFile) && (
@@ -708,9 +708,9 @@ const AdminContent = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Offer End Time</label>
+                                    <label>Offer End (date & time)</label>
                                     <input
-                                        type="time"
+                                        type="datetime-local"
                                         value={item.offerTime || ""}
                                         onChange={(e) =>
                                             handleProductChange(

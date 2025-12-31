@@ -72,6 +72,19 @@ router.post(
                 } catch (err) { }
             }
 
+            // Convert datetime-local format (YYYY-MM-DDTHH:MM) to ISO timestamp
+            let offer_time_value = null;
+            if (offerTime) {
+                // offerTime format from datetime-local input: "2026-01-15T14:30"
+                // Convert to ISO format with timezone
+                const dt = new Date(offerTime);
+                if (!isNaN(dt.getTime())) {
+                    offer_time_value = dt.toISOString();
+                }
+            } else {
+                offer_time_value = existing?.offer_time || null;
+            }
+
             const productObj = {
                 category,
                 model,
@@ -83,7 +96,7 @@ router.post(
                     ? parseFloat(netpayPrice)
                     : existing?.netpay_price || null,
                 offer: offer ? parseInt(offer) : existing?.offer || null,
-                offer_time: offerTime || existing?.offer_time || null,
+                offer_time: offer_time_value,
                 full_specs: fullSpecs || existing?.full_specs || null,
                 image_url,
                 netpay_qr_url,
@@ -118,22 +131,38 @@ router.get("/:category", async (req, res) => {
             .order("created_at", { ascending: false });
         if (error) throw error;
 
-        const mapped = data.map((p) => ({
-            id: p.id,
-            category: p.category,
-            model: p.model,
-            price: p.price,
-            bookingAmount: p.booking_amount,
-            netpayPrice: p.netpay_price,
-            offer: p.offer,
-            offerTime: p.offer_time,
-            fullSpecs: p.full_specs,
-            image: p.image_url,
-            netpayQrCode: p.netpay_qr_url,
-            emiMonths: p.emi_months || '',
-            downPaymentAmount: p.down_payment_amount || null,
-            createdAt: p.created_at,
-        }));
+        const mapped = data.map((p) => {
+            // Convert stored timestamp back to datetime-local format (YYYY-MM-DDTHH:MM)
+            let offerTimeValue = null;
+            if (p.offer_time) {
+                const dt = new Date(p.offer_time);
+                if (!isNaN(dt.getTime())) {
+                    const year = dt.getFullYear();
+                    const month = String(dt.getMonth() + 1).padStart(2, '0');
+                    const day = String(dt.getDate()).padStart(2, '0');
+                    const hours = String(dt.getHours()).padStart(2, '0');
+                    const minutes = String(dt.getMinutes()).padStart(2, '0');
+                    offerTimeValue = `${year}-${month}-${day}T${hours}:${minutes}`;
+                }
+            }
+
+            return {
+                id: p.id,
+                category: p.category,
+                model: p.model,
+                price: p.price,
+                bookingAmount: p.booking_amount,
+                netpayPrice: p.netpay_price,
+                offer: p.offer,
+                offerTime: offerTimeValue,
+                fullSpecs: p.full_specs,
+                image: p.image_url,
+                netpayQrCode: p.netpay_qr_url,
+                emiMonths: p.emi_months || '',
+                downPaymentAmount: p.down_payment_amount || null,
+                createdAt: p.created_at,
+            };
+        });
 
         res.json(mapped);
     } catch (err) {
