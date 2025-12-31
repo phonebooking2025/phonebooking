@@ -603,19 +603,24 @@ const Client = () => {
 
 
           {/* ADVERTISEMENT VIDEO SECTION */}
-          <div className="advertisement-section">
-            <h2 className="ad-title">Special Advertisement</h2>
-            <div className="ad-video-box">
-              <video
-                className="ad-video" controls poster="https://placehold.co/600x350?text=Advertisement+Video">
-                <source src="" type="video/mp4" />
-                Your browser does not support the video tag.</video>
+          {settings?.advertisementVideoUrl && (
+            <div className="advertisement-section">
+              <h2 className="ad-title">Special Advertisement</h2>
 
+              <div className="ad-video-box">
+                <video
+                  className="ad-video"
+                  controls
+                  preload="metadata"
+                >
+                  <source src={settings.advertisementVideoUrl} type="video/mp4" />
+                </video>
+              </div>
+
+              <p className="ad-note">Watch our latest offers & updates.</p>
             </div>
-            <p className="ad-note">
-              Watch our latest offers & updates.
-            </p>
-          </div>
+          )}
+
 
           {/* ===SERVICE SECTION==== */}
           <div className="services-section">
@@ -636,8 +641,25 @@ const Client = () => {
           </div>
 
 
+          {/* ================= APP DOWNLOAD SECTION ================= */}
+          {/* ===== DOWNLOAD APP SECTION ===== */}
+          <div className="download-app-simple">
+            <span className="download-text">
+              📱 Download our mobile app for faster booking
+            </span>
+
+            <a
+              href={settings?.appDownloadUrl || "/apk/phone-booking.apk"}
+              download
+              className="download-btn"
+            >
+              ⬇ Download App
+            </a>
+          </div>
+
 
         </div>
+        {/*------------------- HOME PAGE END ------------------- */}
 
         {/* NETPAY WORKFLOW PAGES */}
         {currentBookingModel && <>

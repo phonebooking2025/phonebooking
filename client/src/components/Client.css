@@ -65,10 +65,12 @@ h2 {
     margin: 0 auto 10px;
     max-width: 120px;
     max-height: 60px;
+    width: auto;
     height: auto;
     object-fit: contain;
     animation: slideDown 0.6s ease-out;
 }
+
 
 .date-time {
     font-size: 0.95em;
@@ -99,6 +101,18 @@ h2 {
     background-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 600px) {
+    .header-image {
+        max-width: 200px;
+        /* little bigger */
+        max-height: 110px;
+    }
+
+    .header h1 {
+        font-size: 1.6em;
+    }
 }
 
 /* ============================================================================
@@ -1025,7 +1039,6 @@ h2 {
 }
 
 
-
 /* ================= ADVERTISEMENT VIDEO SECTION ================= */
 
 .advertisement-section {
@@ -1046,20 +1059,28 @@ h2 {
     margin-bottom: 20px;
 }
 
+/* 🔒 FIXED SIZE BOX */
 .ad-video-box {
+    position: relative;
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
+    /* SAME SIZE ALWAYS */
+    aspect-ratio: 16 / 9;
+    /* FIXED FRAME */
     margin: 0 auto;
     border-radius: 14px;
     overflow: hidden;
-    background: #ffffff;
+    background: #000;
+    /* black bars area */
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
+/* 🎥 VIDEO ADAPTS INSIDE */
 .ad-video {
     width: 100%;
-    height: auto;
-    display: block;
+    height: 100%;
+    object-fit: contain;
+    /* ✅ NO CROP, NO ZOOM */
     border-radius: 14px;
 }
 
@@ -1067,4 +1088,57 @@ h2 {
     margin-top: 15px;
     font-size: 0.95rem;
     color: #6B7280;
+}
+
+/* 📱 MOBILE SAFE */
+@media (max-width: 640px) {
+    .ad-video-box {
+        max-width: 100%;
+    }
+}
+
+
+/* ================= APP DOWNLOAD SECTION ================= */
+/* ===== SIMPLE DOWNLOAD APP ===== */
+
+.download-app-simple {
+    margin: 10px auto;
+    padding: 16px 20px;
+    max-width: 900px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
+    border-radius: 14px;
+}
+
+.download-text {
+    font-size: 1rem;
+    color: #1F2937;
+    font-weight: 500;
+}
+
+.download-btn {
+    background: #4F46E5;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.download-btn:hover {
+    background: #4338CA;
+}
+
+/* 📱 Mobile */
+@media (max-width: 600px) {
+    .download-app-simple {
+        flex-direction: column;
+        text-align: center;
+    }
 }
