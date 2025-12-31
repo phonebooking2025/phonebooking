@@ -653,16 +653,17 @@ const Client = () => {
       <div className="container client-container">
         {/* HOME PAGE */}
         <div id="home-page" className={`page ${activePage === 'home-page' ? 'active' : ''}`}>
+         {/* Product Grid Container */}
           <div className="product-sections-container">
             <div className="product-section left-section">
-              <h2 className="section-title">Mobile Items</h2>
+              <h2 className="section-title items-section">Mobile Items</h2>
               <div className="product-list grid-cards">
                 {mobileData.map(renderProductCard)}
               </div>
             </div>
 
             <div className="product-section right-section">
-              <h2 className="section-title">Other Items</h2>
+              <h2 className="section-title items-section">Other Items</h2>
               <div className="product-list grid-cards">
                 {homeAppliancesData.map(renderProductCard)}
               </div>
