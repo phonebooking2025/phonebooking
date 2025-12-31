@@ -237,7 +237,7 @@ export const AdminDataProvider = ({ children }) => {
         setLoading(true);
         try {
             if (id) {
-                await axiosInstance.delete(`/admin/products/${id}`);
+                await axiosInstance.delete(`/products/admin/${id}`);
                 await fetchAdminData();
             } else {
                 setter(prev => prev.filter((_, i) => i !== index));
@@ -342,7 +342,7 @@ export const AdminDataProvider = ({ children }) => {
                 formData.append('fullSpecs', item.fullSpecs || '');
                 if (item.imageFile) formData.append('imageFile', item.imageFile);
                 if (item.netpayQrCodeFile) formData.append('netpayQrCodeFile', item.netpayQrCodeFile);
-                await axiosInstance.post('/admin/products', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                await axiosInstance.post('/products/admin', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             }
 
             await fetchAdminData();
