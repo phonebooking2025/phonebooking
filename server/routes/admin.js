@@ -81,7 +81,7 @@ router.post(
     upload.fields([
         { name: "companyLogoFile", maxCount: 1 },
         { name: "deliveryImageFile", maxCount: 1 },
-        { name: "bannerFiles", maxCount: 5 },
+        { name: "bannerFiles", maxCount: 20 },
     ]),
     async (req, res) => {
         try {
@@ -117,12 +117,17 @@ router.post(
 
             if (banners) {
                 try {
-                    const oldBannersFromClient = JSON.parse(banners);
+                    const oldBannersFromClient = JSON.parse(banners); // Paths to keep from client
                     const newBanners = bannerArray.filter(
-                        (url) => !oldBannersFromClient.includes(url)
+                        (url) => !oldBannersFromClient.includes(url) // New uploads only
                     );
-                    bannerArray = [...oldBannersFromClient, ...newBanners];
-                } catch { }
+                    // Keep old banners that client still has + add new uploads
+                    bannerArray = oldBannersFromClient.filter(
+                        (url) => bannerArray.includes(url) || oldBannersFromClient.includes(url)
+                    ).concat(newBanners);
+                } catch (e) {
+                    console.error("Error processing banners:", e);
+                }
             }
 
             const settingsObj = {

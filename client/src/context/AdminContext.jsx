@@ -261,7 +261,7 @@ export const AdminDataProvider = ({ children }) => {
     });
 
     const addBannerInput = () => {
-        if (settings.banners.length < 5)
+        if (settings.banners.length < 20)  // Increased limit to 20
             setSettings(prev => ({ ...prev, banners: [...prev.banners, { path: '', newFile: null }] }));
     };
 
