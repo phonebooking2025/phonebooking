@@ -6,6 +6,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import Loading from './Loading';
 import { useNavigate } from 'react-router-dom';
 import { FiCheckCircle, FiTruck, FiShield } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 
 // ==================== STORAGE MANAGEMENT ====================
 const STORAGE_KEYS = {
@@ -600,6 +601,23 @@ const Client = () => {
             <button onClick={() => sendSmsToAdmin()} className="btn-primary">Send Reply</button>
           </div>
 
+
+          {/* ADVERTISEMENT VIDEO SECTION */}
+          <div className="advertisement-section">
+            <h2 className="ad-title">Special Advertisement</h2>
+            <div className="ad-video-box">
+              <video
+                className="ad-video" controls poster="https://placehold.co/600x350?text=Advertisement+Video">
+                <source src="" type="video/mp4" />
+                Your browser does not support the video tag.</video>
+
+            </div>
+            <p className="ad-note">
+              Watch our latest offers & updates.
+            </p>
+          </div>
+
+          {/* ===SERVICE SECTION==== */}
           <div className="services-section">
             <div className="service-item">
               <FiCheckCircle className="service-icon" />
@@ -616,6 +634,8 @@ const Client = () => {
               <span>Trusted & Secure</span>
             </div>
           </div>
+
+
 
         </div>
 
@@ -716,6 +736,17 @@ const Client = () => {
           <LoginComponent onLoginSuccess={handleLoginSuccess} onModalClose={() => setLoginModalVisible(false)} />
         </div>
       </div>
+
+      <a
+        href="https://wa.me/919876543210"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="whatsapp-float"
+        aria-label="Chat on WhatsApp"
+      >
+        <FaWhatsapp className="whatsapp-icon" />
+      </a>
+
 
       {/* FOOTER */}
       <div className="email-display">

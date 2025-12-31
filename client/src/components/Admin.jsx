@@ -138,6 +138,7 @@ const AdminContent = () => {
         latestUserMessage,
         adminReplyContent,
         setAdminReplyContent,
+        handleAdVideoFileChange
     } = useAdminData();
 
     const renderBannerImage = (banner) => {
@@ -174,7 +175,7 @@ const AdminContent = () => {
                     </button>
                 </div>
 
-                <h1 style={{ color: "#2D9966", fontSize:"22px", fontWeight:"700" }}>Admin Panel</h1>
+                <h1 style={{ color: "#2D9966", fontSize: "22px", fontWeight: "700" }}>Admin Panel</h1>
 
                 {/* --- 1. Website Customization --- */}
                 <div className="form-section">
@@ -306,6 +307,29 @@ const AdminContent = () => {
                     </div>
 
                 </div>
+
+
+
+                {/* --- Advertisement Video Upload --- */}
+                <div className="form-section ad-video-admin-section">
+                    <h2 className="section-title"> 🎬 Advertisement Video </h2>
+                    <div className="ad-video-upload-row">
+                        <label className="ad-video-label">
+                            Upload Advertisement Video (MP4):
+                        </label>
+                        <input
+                            type="file"
+                            accept="video/*"
+                            className="ad-video-input"
+                            onChange={(e) => handleAdVideoFileChange(e.target.files[0])}
+                        />
+
+                        <span className="ad-video-note">
+                            (Video upload less than 1 or 2 minute)
+                        </span>
+                    </div>
+                </div>
+
 
                 {/* --- Precious Metal Items --- */}
                 <div id="admin-forms-container" className="form-section precious-section">

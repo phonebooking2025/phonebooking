@@ -996,3 +996,75 @@ h2 {
         margin-bottom: 5px;
     }
 }
+
+
+.whatsapp-float {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background-color: #25D366;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.whatsapp-icon {
+    font-size: 30px;
+}
+
+
+
+/* ================= ADVERTISEMENT VIDEO SECTION ================= */
+
+.advertisement-section {
+    margin: 30px auto 20px;
+    padding: 25px;
+    max-width: 900px;
+    text-align: center;
+    border: 1.5px dashed #4F46E560;
+    box-shadow: 0px 1px 2px #4F46E530;
+    border-radius: 18px;
+    background: #F9FAFB;
+}
+
+.ad-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 20px;
+}
+
+.ad-video-box {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.ad-video {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 14px;
+}
+
+.ad-note {
+    margin-top: 15px;
+    font-size: 0.95rem;
+    color: #6B7280;
+}

@@ -39,9 +39,12 @@ export const AdminDataProvider = ({ children }) => {
         companyLogo: '',
         deliveryImage: '',
         banners: [],
+        advertisementVideoUrl: '',
+        advertisementVideoFile: null,
         companyLogoFile: null,
         deliveryImageFile: null
     });
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -82,9 +85,13 @@ export const AdminDataProvider = ({ children }) => {
         companyLogo: s.company_logo_url || '',
         deliveryImage: s.delivery_image_url || '',
         banners: (s.banners || []).map(url => ({ path: url, newFile: null })),
+        advertisementVideoUrl: s.advertisement_video_url || '',
+        advertisementVideoFile: null,
         companyLogoFile: null,
         deliveryImageFile: null
     });
+
+
 
     // ------------------ PUBLIC DATA ------------------
     const fetchPublicData = useCallback(async () => {
@@ -179,6 +186,16 @@ export const AdminDataProvider = ({ children }) => {
             setLoading(false);
         }
     }, [isAuthenticated, user, logout, fetchPublicData]);
+
+
+    const handleAdVideoFileChange = (file) => {
+        setSettings(prev => ({
+            ...prev,
+            advertisementVideoFile: file
+        }));
+    };
+
+
 
     // ------------------ INIT ------------------
     useEffect(() => {
@@ -292,6 +309,7 @@ export const AdminDataProvider = ({ children }) => {
             settingsFormData.append('header_title', settings.headerTitle || '');
             if (settings.companyLogoFile) settingsFormData.append('companyLogoFile', settings.companyLogoFile);
             if (settings.deliveryImageFile) settingsFormData.append('deliveryImageFile', settings.deliveryImageFile);
+            if (settings.advertisementVideoFile) { settingsFormData.append('advertisementVideoFile', settings.advertisementVideoFile); }
 
             const bannerPaths = [];
             for (const banner of settings.banners || []) {
@@ -360,7 +378,9 @@ export const AdminDataProvider = ({ children }) => {
         sendSmsToUser,
         saveAllChanges,
         fetchAdminData,
-        fetchPublicData
+        fetchPublicData,
+        handleAdVideoFileChange,
+
     };
 
     return <AdminContext.Provider value={contextValue}>{children}</AdminContext.Provider>;
