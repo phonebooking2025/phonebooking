@@ -267,7 +267,7 @@ export const AdminDataProvider = ({ children }) => {
 
     const deleteBanner = async (index) => {
         const bannerToDelete = settings.banners[index];
-        
+
         // If it's an existing banner with a path, delete via API
         if (bannerToDelete.path) {
             setLoading(true);

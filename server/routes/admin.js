@@ -82,12 +82,14 @@ router.post(
         { name: "companyLogoFile", maxCount: 1 },
         { name: "deliveryImageFile", maxCount: 1 },
         { name: "bannerFiles", maxCount: 20 },
+        { name: "advertisementVideoFile", maxCount: 1 },
     ]),
     async (req, res) => {
         try {
             const companyLogoFile = req.files?.companyLogoFile?.[0];
             const deliveryImageFile = req.files?.deliveryImageFile?.[0];
             const bannerFiles = req.files?.bannerFiles || [];
+            const advertisementVideoFile = req.files?.advertisementVideoFile?.[0];
 
             let { header_title, company_logo_url, delivery_image_url, banners } =
                 req.body;
@@ -107,6 +109,14 @@ router.post(
                     "settings/delivery"
                 )
                 : existingSettings?.delivery_image_url || delivery_image_url || null;
+
+            let advertisement_video_url = advertisementVideoFile
+                ? await uploadToCloudinary(
+                    advertisementVideoFile.buffer,
+                    "settings/advertisement",
+                    "video"
+                )
+                : existingSettings?.advertisement_video_url || null;
 
             let bannerArray = existingSettings?.banners || [];
 
@@ -136,6 +146,7 @@ router.post(
                 company_logo_url,
                 delivery_image_url,
                 banners: bannerArray,
+                advertisement_video_url,
             };
 
             const { data, error } = await supabase
@@ -161,7 +172,7 @@ router.delete(
     async (req, res) => {
         try {
             const bannerUrlToDelete = decodeURIComponent(req.params.bannerUrl);
-            
+
             // Get current settings
             const { data: currentSettings, error: fetchError } = await supabase
                 .from("settings")
@@ -185,7 +196,7 @@ router.delete(
 
             if (error) throw error;
 
-            res.json({ 
+            res.json({
                 message: "Banner deleted successfully",
                 settings: data[0]
             });
