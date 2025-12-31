@@ -649,7 +649,8 @@ const Client = () => {
             </span>
 
             <a
-              href={settings?.appDownloadUrl || "/apk/phone-booking.apk"}
+              target='_blank'
+              href={"/https://drive.google.com/file/d/1CjoY8xiDyaqKYJyH2h4-IwXJnMFrypZW/view?usp=sharing"}
               download
               className="download-btn"
             >
