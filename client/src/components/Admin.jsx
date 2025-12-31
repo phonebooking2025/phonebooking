@@ -300,9 +300,9 @@ const AdminContent = () => {
                         </div>
 
                         <div className="form-actions">
-                            <button 
-                                type="button" 
-                                className="banner-button" 
+                            <button
+                                type="button"
+                                className="banner-button"
                                 onClick={addBannerInput}
                                 disabled={settings.banners.length >= 20}
                                 title={settings.banners.length >= 20 ? "Maximum 20 banners allowed" : "Add a new banner"}

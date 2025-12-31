@@ -265,8 +265,28 @@ export const AdminDataProvider = ({ children }) => {
             setSettings(prev => ({ ...prev, banners: [...prev.banners, { path: '', newFile: null }] }));
     };
 
-    const deleteBanner = (index) =>
-        setSettings(prev => ({ ...prev, banners: prev.banners.filter((_, i) => i !== index) }));
+    const deleteBanner = async (index) => {
+        const bannerToDelete = settings.banners[index];
+        
+        // If it's an existing banner with a path, delete via API
+        if (bannerToDelete.path) {
+            setLoading(true);
+            try {
+                await axiosInstance.delete(`/admin/settings/banners/${encodeURIComponent(bannerToDelete.path)}`);
+                // Remove from local state
+                setSettings(prev => ({ ...prev, banners: prev.banners.filter((_, i) => i !== index) }));
+                toast.success('Banner deleted successfully');
+            } catch (err) {
+                console.error('Delete banner error:', err);
+                toast.error(err.response?.data?.message || 'Failed to delete banner');
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            // If it's a new banner (not saved yet), just remove from state
+            setSettings(prev => ({ ...prev, banners: prev.banners.filter((_, i) => i !== index) }));
+        }
+    };
 
     // ------------------ ADMIN ACTIONS ------------------
     const confirmNetpayDelivery = async (orderId) => {

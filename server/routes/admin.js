@@ -153,6 +153,51 @@ router.post(
     }
 );
 
+// ============ DELETE SPECIFIC BANNER ============
+router.delete(
+    "/settings/banners/:bannerUrl",
+    verifyToken,
+    requireAdmin,
+    async (req, res) => {
+        try {
+            const bannerUrlToDelete = decodeURIComponent(req.params.bannerUrl);
+            
+            // Get current settings
+            const { data: currentSettings, error: fetchError } = await supabase
+                .from("settings")
+                .select("banners")
+                .eq("id", "00000000-0000-0000-0000-000000000001")
+                .maybeSingle();
+
+            if (fetchError) throw fetchError;
+
+            // Filter out the banner to delete
+            const updatedBanners = (currentSettings?.banners || []).filter(
+                (banner) => banner !== bannerUrlToDelete
+            );
+
+            // Update settings with new banner array
+            const { data, error } = await supabase
+                .from("settings")
+                .update({ banners: updatedBanners })
+                .eq("id", "00000000-0000-0000-0000-000000000001")
+                .select();
+
+            if (error) throw error;
+
+            res.json({ 
+                message: "Banner deleted successfully",
+                settings: data[0]
+            });
+        } catch (err) {
+            res.status(500).json({
+                message: "Delete banner failed",
+                details: err.message,
+            });
+        }
+    }
+);
+
 // ============ GET SETTINGS ============
 router.get("/settings", async (req, res) => {
     try {
