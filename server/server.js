@@ -56,7 +56,7 @@ app.get("/api/settings", async (req, res) => {
 // ============ ROUTE IMPORTS ============
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productsRoutes);
-app.use("/api/orders", ordersRoutes);
+app.use("/api", ordersRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/messages", messagesRoutes);
 

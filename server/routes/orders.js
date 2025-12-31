@@ -15,7 +15,7 @@ const upload = multer({ storage });
 
 // ============ PLACE ORDER ============
 router.post(
-    "/place",
+    "/orders/place",
     verifyToken,
     upload.single("screenshot"),
     async (req, res) => {
@@ -60,7 +60,7 @@ router.post(
 );
 
 // ============ NETPAY ORDER ============
-router.post("/netpay", verifyToken, async (req, res) => {
+router.post("/orders/netpay", verifyToken, async (req, res) => {
     try {
         const { id, name, mobile, address, model, price, screenshot, timestamp } =
             req.body;
@@ -106,7 +106,7 @@ router.post("/netpay", verifyToken, async (req, res) => {
 
 // ============ GET ALL ORDERS (ADMIN) ============
 router.get(
-    "/admin",
+    "/admin/orders",
     verifyToken,
     requireAdmin,
     async (req, res) => {
@@ -127,7 +127,7 @@ router.get(
 );
 
 // ============ GET ALL ORDERS (PUBLIC) ============
-router.get("/public", async (req, res) => {
+router.get("/public/orders", async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("orders")
@@ -145,7 +145,7 @@ router.get("/public", async (req, res) => {
 
 // ============ CONFIRM ORDER ============
 router.put(
-    "/admin/:id/confirm",
+    "/admin/orders/:id/confirm",
     verifyToken,
     requireAdmin,
     async (req, res) => {
