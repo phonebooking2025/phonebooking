@@ -73,18 +73,31 @@ export const AdminDataProvider = ({ children }) => {
         createdAt: p.createdAt
     });
 
-    const mapOrderFromDb = (order) => ({
-        id: order.id,
-        model: order.product?.model,
-        userName: order.user_name,
-        amount: order.amount,
-        screenshot: order.screenshot_url,
-        deliveryStatus: order.delivery_status,
-        deliveryDate: order.delivery_date,
-        createdAt: order.created_at,
-        address: order.address || '',
-        mobile: order.mobile || '',
-    });
+    const mapOrderFromDb = (order) => {
+        const emiApp = (order.emi_applications && order.emi_applications[0]) || null;
+
+        return {
+            id: order.id,
+            model: order.product?.model,
+            userName: order.user_name,
+            amount: order.amount,
+            screenshot: order.screenshot_url,
+            deliveryStatus: order.delivery_status,
+            deliveryDate: order.delivery_date,
+            createdAt: order.created_at,
+            address: order.address || '',
+            mobile: order.mobile || '',
+            // Payment / EMI related fields (prefer emi_applications record when present)
+            emiType: order.emi_type || (emiApp ? 'EMI' : null),
+            paymentMethod: order.payment_method || null,
+            emiMonths: order.emi_months ?? (emiApp?.emi_months ?? null),
+            downPayment: order.down_payment ?? (emiApp?.down_payment ?? null),
+            aadhar: order.aadhar || emiApp?.aadhar_number || null,
+            bankDetails: order.bank_details || emiApp?.bank_details || null,
+            userPhoto: order.user_photo_url || emiApp?.user_photo_url || null,
+            monthlyEmi: order.monthly_emi ?? (emiApp?.monthly_emi ?? null),
+        };
+    };
 
     const mapSettingsFromDb = (s) => ({
         id: s.id || null,

@@ -232,7 +232,7 @@ router.get(
         try {
             const { data, error } = await supabase
                 .from("orders")
-                .select("*, address, product:product_id(model)")
+                .select("*, address, product:product_id(model), emi_applications(*)")
                 .order("created_at", { ascending: false });
 
             if (error) throw error;
@@ -250,7 +250,7 @@ router.get("/public/orders", async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("orders")
-            .select("*, address, product:product_id(model)")
+            .select("*, address, product:product_id(model), emi_applications(*)")
             .order("created_at", { ascending: false });
 
         if (error) throw error;

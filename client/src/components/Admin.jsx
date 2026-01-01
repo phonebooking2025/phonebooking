@@ -430,7 +430,7 @@ const AdminContent = () => {
 
                 {/* --- Precious Metal Items --- */}
                 <div id="admin-forms-container" className="form-section precious-section">
-                    <h2>Precious Metal Items</h2>
+                    <h2>Mobile Items</h2>
 
                     {preciousItems.map((item, index) => (
                         <div className="form-section precious-card" key={item.id || index}>
@@ -443,8 +443,7 @@ const AdminContent = () => {
                                 </button>
                             </div>
 
-                            <h3>Precious Metal Item {index + 1}</h3>
-
+                            <h3> Mobile Item {index + 1}</h3>
                             <div className="form-container admin-form-container">
                                 <div className="form-group">
                                     <label>Item Name</label>
@@ -550,7 +549,7 @@ const AdminContent = () => {
                             </div>
 
                             {/* Images */}
-                            <div className="form-container admin-form-container">
+                            <div className="form-container">
                                 <div className="form-group">
                                     <label>Item Image</label>
                                     {(item.image || item.imageFile) && (
@@ -622,7 +621,7 @@ const AdminContent = () => {
                         </div>
                     ))}
 
-                    <div className="form-actions">
+                    <div className="form-actions admin-form-container">
                         <button className="btn-add-precious" onClick={() => addMoreProduct("precious")}>
                             + Add More Precious Metal Items
                         </button>
@@ -651,7 +650,7 @@ const AdminContent = () => {
                             <h3>Other Item {index + 1}</h3>
 
                             {/* Grid Fields */}
-                            <div className="form-container">
+                            <div className="form-container admin-form-container">
                                 <div className="form-group">
                                     <label>Item Name</label>
                                     <input
@@ -902,14 +901,48 @@ const AdminContent = () => {
                                         <p><strong>Address:</strong> {sale.address}</p>
                                     </div>
 
-                                    {sale.screenshot && (
-                                        <div className="sales-image">
-                                            <strong>Payment Screenshot</strong>
-                                            <img
-                                                src={sale.screenshot}
-                                                alt="Payment Proof"
-                                                className="user-screenshot"
-                                            />
+                                    <div className="sales-payment">
+                                        <p>
+                                            <strong>Payment Type:</strong>{' '}
+                                            {sale.emiType || sale.paymentMethod || 'Unknown'}
+                                        </p>
+
+                                        {sale.screenshot ? (
+                                            <p>
+                                                <strong>Payment Proof:</strong>{' '}
+                                                <a className="short-link" href={sale.screenshot} target="_blank" rel="noreferrer">Open</a>
+                                                <a href={sale.screenshot} target="_blank" rel="noreferrer" style={{ marginLeft: 8 }}>
+                                                    <img
+                                                        className="payment-thumb"
+                                                        src={sale.screenshot}
+                                                        alt="Payment Proof"
+                                                    />
+                                                </a>
+                                            </p>
+                                        ) : null}
+
+                                        {sale.userPhoto ? (
+                                            <p>
+                                                <strong>User Photo:</strong>{' '}
+                                                <a className="short-link" href={sale.userPhoto} target="_blank" rel="noreferrer">Open</a>
+                                                <a href={sale.userPhoto} target="_blank" rel="noreferrer" style={{ marginLeft: 8 }}>
+                                                    <img
+                                                        className="user-thumb"
+                                                        src={sale.userPhoto}
+                                                        alt="User Photo"
+                                                    />
+                                                </a>
+                                            </p>
+                                        ) : null}
+                                    </div>
+
+                                    {sale.emiType === 'EMI' && (
+                                        <div className="emi-details">
+                                            <p><strong>EMI Months:</strong> {sale.emiMonths ?? 'Null'}</p>
+                                            <p><strong>Down Payment:</strong> {sale.downPayment != null ? `₹ ${sale.downPayment}` : 'Null'}</p>
+                                            <p><strong>Monthly EMI:</strong> {sale.monthlyEmi != null ? `₹ ${sale.monthlyEmi}` : 'Null'}</p>
+                                            <p><strong>Aadhar:</strong> {sale.aadhar || 'Null'}</p>
+                                            <p><strong>Bank Details:</strong> {sale.bankDetails || 'Null'}</p>
                                         </div>
                                     )}
 
