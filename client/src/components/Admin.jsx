@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAdminData, AdminDataProvider } from "../context/AdminContext";
 import { useAuth, AuthProvider } from "../context/AuthContext";
 import Loading from "./Loading"; // <- new Loading component
 import { useNavigate } from "react-router-dom";
 import "./Admin.css";
-import { FiGrid, FiHome, FiLogOut, FiSave, FiSend, FiSettings } from 'react-icons/fi'
+import { FiGrid, FiHome, FiLogOut, FiSave, FiSend, FiSettings, FiPhone, FiLock, FiChevronUp, FiChevronDown } from 'react-icons/fi'
 
 // --- ADMIN LOGIN FORM COMPONENT ---
 const AdminLoginForm = () => {
@@ -19,93 +19,90 @@ const AdminLoginForm = () => {
         login(mobile, password);
     };
 
+    if (loading) {
+        return (
+            <div className="auth-status-container">
+                <div className="auth-status-content">
+                    <p className="auth-status-message">Verifying Credentials</p>
+                    <p className="loading-dot-text">.</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div
-            style={{
-                maxWidth: "400px",
-                margin: "100px auto",
-                padding: "40px",
-                backgroundColor: "#fff",
-                borderRadius: "10px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            }}
-        >
-            <p
-                className="home"
-                style={{
-                    fontSize: "12px",
-                    padding: "4px 6px",
-                    width: "80px",
-                    textAlign: "center",
-                    backgroundColor: "#28a745",
-                    color: "white",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                }}
+        <div className="admin-login-container">
+            <button
+                type="button"
+                className="btn-home-back"
                 onClick={() => navigate("/")}
+                title="Go back to Home"
             >
-                Home Page
-            </p>
-            <h2 style={{ textAlign: "center", color: "#264D59" }}>Admin Login</h2>
-            <form onSubmit={handleSubmit}>
-                {loginError && (
-                    <p style={{ color: "red", textAlign: "center" }}>{loginError}</p>
-                )}
+                <FiHome size={18} />
+                <span>Home</span>
+            </button>
 
-                <div style={{ marginBottom: "15px" }}>
-                    <label style={{ display: "block", marginBottom: "5px" }}>
-                        Mobile:
-                    </label>
-                    <input
-                        type="text"
-                        value={mobile}
-                        onChange={(e) => setMobile(e.target.value)}
-                        required
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            border: "1px solid #ccc",
-                            borderRadius: "5px",
-                            boxSizing: "border-box",
-                        }}
-                    />
+            <div className="admin-login-card">
+                <div className="login-header">
+                    <h1 className="login-title">Admin Panel</h1>
+                    <p className="login-subtitle">Secure Login</p>
                 </div>
 
-                <div style={{ marginBottom: "20px" }}>
-                    <label style={{ display: "block", marginBottom: "5px" }}>
-                        Password:
-                    </label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            border: "1px solid #ccc",
-                            borderRadius: "5px",
-                            boxSizing: "border-box",
-                        }}
-                    />
-                </div>
+                <form onSubmit={handleSubmit} className="admin-login-form">
+                    {loginError && (
+                        <div className="login-error">
+                            <p>{loginError}</p>
+                        </div>
+                    )}
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                        width: "100%",
-                        padding: "10px",
-                        backgroundColor: "#264D59",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                    }}
-                >
-                    {loading ? "Logging In..." : "Login"}
-                </button>
-            </form>
+                    <div className="form-field">
+                        <label htmlFor="mobile-input">Mobile Number</label>
+                        <div className="input-wrapper">
+                            <FiPhone className="input-icon" />
+                            <input
+                                id="mobile-input"
+                                type="tel"
+                                placeholder="Enter your phone number"
+                                value={mobile}
+                                onChange={(e) => setMobile(e.target.value)}
+                                required
+                                className="form-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-field">
+                        <label htmlFor="password-input">Password</label>
+                        <div className="input-wrapper">
+                            <FiLock className="input-icon" />
+                            <input
+                                id="password-input"
+                                type="password"
+                                placeholder="Enter your password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                className="form-input"
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="login-submit-btn"
+                    >
+                        {loading ? (
+                            <>
+                                <span className="spinner"></span>
+                                Logging In...
+                            </>
+                        ) : (
+                            'Login'
+                        )}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };
@@ -116,20 +113,51 @@ const AdminContent = () => {
 
     const navigate = useNavigate();
 
-
     const [showFloatingSave, setShowFloatingSave] = useState(false);
+    const [showScrollButtons, setShowScrollButtons] = useState({ up: false, down: false });
+    const containerRef = useRef(null);
+
+    const handleScroll = () => {
+        const scrollY = window.scrollY;
+
+        if (scrollY > 1500) {
+            setShowFloatingSave(true);
+        } else {
+            setShowFloatingSave(false);
+        }
+
+        // Determine if the page is scrollable
+        const totalHeight = document.documentElement.scrollHeight;
+        const viewport = window.innerHeight;
+        const isScrollable = totalHeight > viewport + 2; // small tolerance
+
+        if (!isScrollable) {
+            setShowScrollButtons({ up: false, down: false });
+            return;
+        }
+
+        // Scroll button visibility
+        setShowScrollButtons({
+            up: scrollY > 50,
+            down: scrollY < totalHeight - viewport - 50
+        });
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const scrollToBottom = () => {
+        window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth'
+        });
+    };
 
     React.useEffect(() => {
-        const handleScroll = () => {
-            if (window.scrollY > 1500) {
-                setShowFloatingSave(true);
-            } else {
-                setShowFloatingSave(false);
-            }
-        };
-
         window.addEventListener("scroll", handleScroll);
-
+        // run once to set initial visibility
+        handleScroll();
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
@@ -1018,6 +1046,26 @@ const AdminContent = () => {
                 >
                     <FiSave size={20} />
                     Save
+                </button>
+            )}
+
+            {showScrollButtons.up && (
+                <button
+                    className="scroll-btn scroll-up"
+                    onClick={scrollToTop}
+                    title="Scroll to top"
+                >
+                    <FiChevronUp size={20} />
+                </button>
+            )}
+
+            {showScrollButtons.down && (
+                <button
+                    className="scroll-btn scroll-down"
+                    onClick={scrollToBottom}
+                    title="Scroll to bottom"
+                >
+                    <FiChevronDown size={20} />
                 </button>
             )}
 

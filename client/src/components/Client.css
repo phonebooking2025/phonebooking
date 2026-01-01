@@ -337,20 +337,7 @@ h2 {
     margin-top: auto;
 }
 
-/* --- Dark Mode --- */
-@media (prefers-color-scheme: dark) {
-    .product-card {
-        background: #1e1e1e;
-    }
 
-    .product-content h3 {
-        color: #f5f5f5;
-    }
-
-    .price-struck {
-        color: #b0b0b0;
-    }
-}
 
 /* --- Products Responsive --- */
 @media (max-width: 768px) {
@@ -481,18 +468,20 @@ h2 {
     }
 }
 
+/* Mobile views  */
 @media (max-width: 360px) {
     .home-page {
         margin: 0 !important;
     }
 
     .product-card {
-        width: 85% !important;
-        height: 320px !important;
+        width: 100% !important;
+        height: 300px !important;
     }
 
     .product-image {
-        height: 160px;
+        margin-top: 12px;
+        height: 150px;
     }
 
     .product-content {
@@ -709,12 +698,48 @@ h2 {
     border-left: 4px solid #264D59;
 }
 
+.netpay-buy-btn {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.netpay-buy-btn:hover {
+    background-color: #0056b3;
+}
+
+.netpay-emi-btn {
+    background-color: #ffbf00;
+    color: #000000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.netpay-emi-btn:hover {
+    background-color: #e6ac00;
+}
+
 /* --- Forms Responsive --- */
 @media (max-width: 768px) {
 
     .login-form-group input,
     .login-form-group textarea {
         width: 100%;
+    }
+
+    .netpay-buy-btn,
+    .netpay-emi-btn {
+        font-size: 12px;
+        color: white !important;
     }
 }
 
@@ -932,6 +957,10 @@ h2 {
     color: #1D4ED8;
     font-size: 1.6em;
     margin: 20px 0;
+}
+
+.netpay-price span {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
 }
 
 .qr-code-image {

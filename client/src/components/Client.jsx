@@ -573,6 +573,11 @@ const Client = () => {
       </div>
       <div className="product-content">
         <h3>{product.model}</h3>
+        {product.buyOneGetOne === 'Yes' && (
+          <p style={{ color: '#E91E63', fontWeight: '700', fontSize: '10px', margin: '6px 0', letterSpacing: '0.5px' }}>
+            BUY 1 GET 1 FREE
+          </p>
+        )}
         <p className="price-struck">Market: ₹{product.bookingAmount}</p>
         <p className="price">Netpay: ₹{product.netpayPrice}</p>
         <div className="product-actions">
@@ -806,18 +811,19 @@ const Client = () => {
               <img src={currentBookingModel.image} alt="Product Image" className="netpay-product-image" />
               <h4>Item Full Details:</h4>
               <p className="item-specs">{currentBookingModel.fullSpecs || 'No details available.'}</p>
-              <h3 className="netpay-price">Price: INR {currentBookingModel.netpayPrice}</h3>
+              <h3 className="netpay-price">Netpay Price: <span style={{fontWeight:"600"}}>₹{currentBookingModel.netpayPrice}</span> </h3>
               {currentBookingModel.buyOneGetOne === 'Yes' && (
                 <div className="b1g1-detail-box">
                   <h4 style={{ color: '#E91E63' }}>BUY 1 GET 1 FREE</h4>
-                  <p style={{ margin: 0 }}>Offer Ends On: {currentBookingModel.offerTime ? new Date(currentBookingModel.offerTime).toLocaleString() : 'Limited Time'}</p>
+                  <p style={{ fontSize: "12px", fontWeight: "700", color: "red" }}>(This offer is valid for Netpay only)</p>
+                  <p style={{ margin: "5px 0", display: "flex", flexDirection: "column", gap: "2px" }}><span style={{ fontSize: "13px", color: "#666", fontWeight: "600" }}>Offer Ends On:</span><span style={{ fontSize: "15px", color: "#FF0000", fontWeight: "bold" }}>{currentBookingModel.offerTime ? `${new Date(currentBookingModel.offerTime).getDate().toString().padStart(2, '0')}/${(new Date(currentBookingModel.offerTime).getMonth() + 1).toString().padStart(2, '0')}/${new Date(currentBookingModel.offerTime).getFullYear()} at ${new Date(currentBookingModel.offerTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}` : 'Limited Time'}</span></p>
                 </div>
               )}
             </div>
             <div className="purchase-options" style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '20px' }}>
-              <button onClick={() => showPage('netpay-info-page')} className="btn-primary" style={{ flex: 1 }}>Netpay Payment</button>
+              <button onClick={() => showPage('netpay-info-page')} className="netpay-buy-btn" style={{ flex: 1 }}>Netpay Buy</button>
               {currentBookingModel.emiMonths && currentBookingModel.emiMonths.toString().trim() !== '' && (
-                <button onClick={() => showPage('emi-details-page')} className="btn-primary" style={{ flex: 1 }}>EMI Payment</button>
+                <button onClick={() => showPage('emi-details-page')} className="netpay-emi-btn" style={{ flex: 1 }}>EMI Payment</button>
               )}
             </div>
           </div>
