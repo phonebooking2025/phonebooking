@@ -240,6 +240,7 @@ const Client = () => {
     sendMessage,
     placeOrder,
     placeNetpayOrder,
+    placeEmiOrder,
     fetchUserMessages,
   } = useClientData();
 
@@ -428,8 +429,14 @@ const Client = () => {
   };
 
   const confirmEmi = async () => {
-    if (!netpayScreenshotRef.current || netpayScreenshotRef.current.files.length === 0) return;
-    if (!pendingEmi) return;
+    if (!netpayScreenshotRef.current || netpayScreenshotRef.current.files.length === 0) {
+      toast.error('Please upload payment screenshot');
+      return;
+    }
+    if (!pendingEmi) {
+      toast.error('Order data not found');
+      return;
+    }
 
     setConfirmingEmi(true);
 
@@ -451,15 +458,20 @@ const Client = () => {
       formData.append('down_payment', pendingEmi.downPayment);
       formData.append('screenshot', file);
 
-      const response = await placeOrder(formData);
+      const response = await placeEmiOrder(formData);
 
-      setPendingEmi(null);
-      setNetpayForm(prev => ({ ...prev, address: '' }));
-      showPage('netpay-history-page');
-      setOrderSuccessPopup(true);
+      if (response.order) {
+        toast.success('EMI Order placed successfully!');
+        setPendingEmi(null);
+        setNetpayForm(prev => ({ ...prev, address: '', name: '', mobile: '', aadhar: '', bankDetails: '' }));
+        showPage('home-page');
+        setOrderSuccessPopup(true);
+      }
 
     } catch (error) {
-      console.error("EMI order placement API error:", error.response?.data || error.message);
+      console.error("EMI order placement API error:", error);
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to place EMI order';
+      toast.error(errorMsg);
     } finally {
       setConfirmingEmi(false)
     }
@@ -483,8 +495,14 @@ const Client = () => {
   };
 
   const confirmNetpay = async () => {
-    if (!netpayScreenshotRef.current || netpayScreenshotRef.current.files.length === 0) return;
-    if (!pendingNetpay) return;
+    if (!netpayScreenshotRef.current || netpayScreenshotRef.current.files.length === 0) {
+      toast.error('Please upload payment screenshot');
+      return;
+    }
+    if (!pendingNetpay) {
+      toast.error('Order data not found');
+      return;
+    }
 
     setConfirmingPayment(true);
 
@@ -501,8 +519,9 @@ const Client = () => {
 
       const response = await placeOrder(formData);
 
-      const newOrder = response.data?.order;
-      if (newOrder) {
+      if (response.order) {
+        toast.success('Netpay Order placed successfully!');
+        const newOrder = response.order;
         const newLocalOrder = {
           id: newOrder.id,
           model: pendingNetpay.model,
@@ -516,12 +535,14 @@ const Client = () => {
       }
 
       setPendingNetpay(null);
-      setNetpayForm(prev => ({ ...prev, address: '' }));
-      showPage('netpay-history-page');
+      setNetpayForm(prev => ({ ...prev, address: '', name: '', mobile: '' }));
+      showPage('home-page');
       setOrderSuccessPopup(true);
 
     } catch (error) {
-      console.error("Order placement API error:", error.response?.data || error.message);
+      console.error("Order placement API error:", error);
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to place order';
+      toast.error(errorMsg);
     } finally {
       setConfirmingPayment(false)
     }
@@ -542,9 +563,6 @@ const Client = () => {
 
   const renderProductCard = (product, index) => (
     <div className="product-card" key={product.id || `product-${index}`}>
-      {product.buyOneGetOne === 'Yes' && (
-        <div className="b1g1-badge">BUY 1 GET 1</div>
-      )}
       {product.offer && (
         <div className="offer-circle">
           <span className="offer-text">{product.offer}%</span>
@@ -782,34 +800,43 @@ const Client = () => {
           {/* Netpay Details Page */}
           <div id="netpay-details-page" className={`page ${activePage === 'netpay-details-page' ? 'active' : ''}`}>
             <button onClick={() => showPage('home-page')} className="btn-back">← Back to Home</button>
-            <h2>Netpay Purchase</h2>
+            <h2>Purchase Option</h2>
             <div className="netpay-details">
               <h3>{currentBookingModel.model}</h3>
               <img src={currentBookingModel.image} alt="Product Image" className="netpay-product-image" />
               <h4>Item Full Details:</h4>
               <p className="item-specs">{currentBookingModel.fullSpecs || 'No details available.'}</p>
-              <h3 className="netpay-price">Netpay Price: INR {currentBookingModel.netpayPrice}</h3>
+              <h3 className="netpay-price">Price: INR {currentBookingModel.netpayPrice}</h3>
               {currentBookingModel.buyOneGetOne === 'Yes' && (
                 <div className="b1g1-detail-box">
                   <h4 style={{ color: '#E91E63' }}>BUY 1 GET 1 FREE</h4>
-                  <p style={{ margin: 0 }}>Offer Ends On: {currentBookingModel.offerEndDateTime ? new Date(currentBookingModel.offerEndDateTime).toLocaleString() : 'Limited Time'}</p>
+                  <p style={{ margin: 0 }}>Offer Ends On: {currentBookingModel.offerTime ? new Date(currentBookingModel.offerTime).toLocaleString() : 'Limited Time'}</p>
                 </div>
               )}
             </div>
-            <button onClick={() => showPage('netpay-info-page')} className="btn-primary">Proceed to Checkout</button>
+            <div className="purchase-options" style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '20px' }}>
+              <button onClick={() => showPage('netpay-info-page')} className="btn-primary" style={{ flex: 1 }}>Netpay Payment</button>
+              {currentBookingModel.emiMonths && currentBookingModel.emiMonths.toString().trim() !== '' && (
+                <button onClick={() => showPage('emi-details-page')} className="btn-primary" style={{ flex: 1 }}>EMI Payment</button>
+              )}
+            </div>
           </div>
 
           {/* Netpay Info Page */}
           <div id="netpay-info-page" className={`page ${activePage === 'netpay-info-page' ? 'active' : ''}`}>
             <button onClick={() => showPage('netpay-details-page')} className="btn-back">← Back</button>
-            <h2>Enter Your Details for Netpay</h2>
+            <h2>Enter Your Details for Netpay Purchase</h2>
             <form onSubmit={(e) => { e.preventDefault(); submitNetpayForm(); }} className="netpay-form">
               <div className="form-group">
-                <label>Item Name:</label>
+                <label>Product Name:</label>
                 <p className="form-display-value">{currentBookingModel.model}</p>
               </div>
               <div className="form-group">
-                <label htmlFor="netpay-user-name">Your Name:</label>
+                <label>Netpay Amount (INR):</label>
+                <p className="form-display-value">{currentBookingModel.netpayPrice}</p>
+              </div>
+              <div className="form-group">
+                <label htmlFor="netpay-user-name">Customer Name:</label>
                 <input type="text" id="netpay-user-name" value={netpayForm.name} onChange={handleNetpayFormChange} required />
               </div>
               <div className="form-group">
@@ -846,51 +873,28 @@ const Client = () => {
         {/* EMI WORKFLOW PAGES */}
         {currentBookingModel && activePage?.startsWith('emi') && <>
           <div id="emi-details-page" className={`page ${activePage === 'emi-details-page' ? 'active' : ''}`}>
-            <button onClick={() => showPage('home-page')} className="btn-back">← Back to Home</button>
-            <h2>EMI Purchase</h2>
-            <div className="netpay-details">
-              <h3>{currentBookingModel.model}</h3>
-              <img src={currentBookingModel.image} alt="Product Image" className="netpay-product-image" />
-              <h4>Item Full Details:</h4>
-              <p className="item-specs">{currentBookingModel.fullSpecs || 'No details available.'}</p>
-              <h3 className="netpay-price">Netpay Price: INR {currentBookingModel.netpayPrice}</h3>
-              {currentBookingModel.buyOneGetOne === 'Yes' && (
-                <div className="b1g1-detail-box">
-                  <h4 style={{ color: '#E91E63' }}>BUY 1 GET 1 FREE</h4>
-                  <p style={{ margin: 0 }}>Offer Ends On: {currentBookingModel.offerEndDateTime ? new Date(currentBookingModel.offerEndDateTime).toLocaleString() : 'Limited Time'}</p>
-                </div>
-              )}
-            </div>
-
-            <h3>Choose EMI Plan</h3>
+            <button onClick={() => showPage('netpay-details-page')} className="btn-back">← Back</button>
+            <h2>EMI Application Form</h2>
             <form onSubmit={(e) => { e.preventDefault(); submitEmiForm(); }} className="netpay-form">
               <div className="form-group">
-                <label>Available Plans (months):</label>
-                <select value={emiSelectedMonths} onChange={(e) => setEmiSelectedMonths(e.target.value)}>
+                <label>Product Name:</label>
+                <p className="form-display-value">{currentBookingModel.model}</p>
+              </div>
+              <div className="form-group">
+                <label>Amount (INR):</label>
+                <p className="form-display-value">{currentBookingModel.netpayPrice}</p>
+              </div>
+              <div className="form-group">
+                <label>EMI Plan (months):</label>
+                <select value={emiSelectedMonths} onChange={(e) => setEmiSelectedMonths(e.target.value)} required>
                   <option value="">Select a plan</option>
                   {(currentBookingModel.emiMonths || '').toString().split(',').map((m, idx) => m.trim() && <option key={idx} value={m.trim()}>{m.trim()} months</option>)}
                 </select>
               </div>
               <div className="form-group">
-                <label>Down Payment (INR):</label>
+                <label>Down Payment Amount (INR):</label>
                 <input type="number" value={emiDownPaymentInput} onChange={(e) => setEmiDownPaymentInput(e.target.value)} placeholder={currentBookingModel.downPaymentAmount || '0'} />
               </div>
-
-              <div className="form-group">
-                <label>Aadhar / Driving License Number:</label>
-                <input type="text" value={netpayForm.aadhar} onChange={handleNetpayFormChange} id="netpay-user-aadhar" placeholder="Enter Aadhar or DL number" />
-              </div>
-
-              <div className="form-group">
-                <label>Bank Details:</label>
-                <textarea rows="2" value={netpayForm.bankDetails} onChange={handleNetpayFormChange} id="netpay-user-bankDetails" placeholder="Enter bank name / account / IFSC"></textarea>
-              </div>
-
-              <div className="form-group">
-                <label>Your Photo (for EMI verification):</label>
-                <input type="file" accept="image/*" ref={userPhotoRef} />
-              </div>
-
               <div className="form-group">
                 <label>Customer Name:</label>
                 <input type="text" value={netpayForm.name} onChange={handleNetpayFormChange} id="netpay-user-name" required />
@@ -902,6 +906,18 @@ const Client = () => {
               <div className="form-group">
                 <label>Home Address:</label>
                 <textarea rows="3" value={netpayForm.address} onChange={handleNetpayFormChange} id="netpay-user-address" required></textarea>
+              </div>
+              <div className="form-group">
+                <label>Aadhar / Driving License Number:</label>
+                <input type="text" value={netpayForm.aadhar} onChange={handleNetpayFormChange} id="netpay-user-aadhar" placeholder="Enter Aadhar or DL number" />
+              </div>
+              <div className="form-group">
+                <label>Bank Details:</label>
+                <textarea rows="2" value={netpayForm.bankDetails} onChange={handleNetpayFormChange} id="netpay-user-bankDetails" placeholder="Enter bank name / account / IFSC"></textarea>
+              </div>
+              <div className="form-group">
+                <label>Customer Photo (for EMI verification):</label>
+                <input type="file" accept="image/*" ref={userPhotoRef} />
               </div>
 
               <button type="button" onClick={submitEmiForm} className="btn-primary">Proceed to Payment (QR)</button>

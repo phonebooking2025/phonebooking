@@ -525,18 +525,6 @@ const AdminContent = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Buy 1 Get 1 Offer End (date & time)</label>
-                                    <input
-                                        type="datetime-local"
-                                        value={item.offerEndDateTime || ""}
-                                        onChange={(e) =>
-                                            handleProductChange(index, "offerEndDateTime", e.target.value, "precious")
-                                        }
-                                    />
-                                </div>
-
-
-                                <div className="form-group">
                                     <label>Offer (%)</label>
                                     <input
                                         type="number"
@@ -750,18 +738,6 @@ const AdminContent = () => {
                                         <option value="Yes">Yes</option>
                                     </select>
                                 </div>
-
-                                <div className="form-group">
-                                    <label>Buy 1 Get 1 Offer End (date & time)</label>
-                                    <input
-                                        type="datetime-local"
-                                        value={item.offerEndDateTime || ""}
-                                        onChange={(e) =>
-                                            handleProductChange(index, "offerEndDateTime", e.target.value, "other")
-                                        }
-                                    />
-                                </div>
-
 
                                 <div className="form-group">
                                     <label>Offer (%)</label>

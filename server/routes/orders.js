@@ -104,6 +104,71 @@ router.post("/orders/netpay", verifyToken, async (req, res) => {
     }
 });
 
+// ============ EMI ORDER ============
+router.post(
+    "/orders/emi",
+    verifyToken,
+    upload.fields([{ name: "screenshot", maxCount: 1 }, { name: "user_photo", maxCount: 1 }]),
+    async (req, res) => {
+        try {
+            const { product_id, product_name, user_name, mobile, address, aadhar, bank_details, amount, emi_months, down_payment } = req.body;
+
+            if (!product_id || !user_name || !mobile || !address || !amount || !emi_months) {
+                return res.status(400).json({ message: "Missing required fields" });
+            }
+
+            let screenshot_url = null;
+            let user_photo_url = null;
+
+            if (req.files?.screenshot?.[0]) {
+                screenshot_url = await uploadToCloudinary(
+                    req.files.screenshot[0].buffer,
+                    "orders/emi/screenshots"
+                );
+            }
+
+            if (req.files?.user_photo?.[0]) {
+                user_photo_url = await uploadToCloudinary(
+                    req.files.user_photo[0].buffer,
+                    "orders/emi/photos"
+                );
+            }
+
+            const emiPayload = {
+                user_id: req.user.id,
+                product_id,
+                product_name: product_name || null,
+                amount: parseFloat(amount),
+                user_name,
+                mobile,
+                address,
+                aadhar: aadhar || null,
+                bank_details: bank_details || null,
+                user_photo_url,
+                emi_months: parseInt(emi_months),
+                down_payment: parseFloat(down_payment) || 0,
+                screenshot_url,
+                delivery_status: "EMI Pending",
+            };
+
+            const { data, error } = await supabase
+                .from("orders")
+                .insert([emiPayload])
+                .select();
+
+            if (error) throw error;
+            await sendAdminNotificationEmail(emiPayload, product_name);
+
+            return res.status(201).json({ order: data[0] });
+        } catch (err) {
+            return res.status(500).json({
+                message: "Place EMI order failed",
+                details: err.message,
+            });
+        }
+    }
+);
+
 // ============ GET ALL ORDERS (ADMIN) ============
 router.get(
     "/admin/orders",

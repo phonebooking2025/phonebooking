@@ -67,6 +67,8 @@ export const ClientDataProvider = ({ children }) => {
     productVideo: p.productVideo || null,
     buyOneGetOne: p.buyOneGetOne || 'No',
     offerEndDateTime: p.offerEndDateTime || null,
+    emiMonths: p.emiMonths || '',
+    downPaymentAmount: p.downPaymentAmount || 0,
     createdAt: p.createdAt,
   });
 
@@ -169,6 +171,14 @@ export const ClientDataProvider = ({ children }) => {
     placeNetpayOrder: async (payload) => {
       try {
         const res = await axiosInstance.post('/orders/netpay', payload);
+        return res.data;
+      } catch (err) {
+        throw err;
+      }
+    },
+    placeEmiOrder: async (formData) => {
+      try {
+        const res = await axiosInstance.post('/orders/emi', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
         return res.data;
       } catch (err) {
         throw err;
