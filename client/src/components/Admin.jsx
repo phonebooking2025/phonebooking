@@ -321,6 +321,49 @@ const AdminContent = () => {
                             </div>
                         </div>
 
+                        {/* Header Background Color Selector */}
+                        <div className="form-group">
+                            <label htmlFor="header-bg-color">Header Background Color:</label>
+                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }} className="color-picker-contain">
+                                <select
+                                    id="header-bg-color"
+                                    value={settings.headerBgColor || '#1D4ED8'}
+                                    onChange={(e) => handleSettingsChange('headerBgColor', e.target.value)}
+                                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px' }}
+                                >
+                                    <option value="#1D4ED8">Deep Blue</option>
+                                    <option value="#DC2626">Crimson Red</option>
+                                    <option value="#059669">Emerald Green</option>
+                                    <option value="#7C3AED">Royal Purple</option>
+                                    <option value="#0891B2">Cyan</option>
+                                    <option value="#EA580C">Deep Orange</option>
+                                    <option value="#0F766E">Teal</option>
+                                    <option value="#6366F1">Indigo</option>
+                                    <option value="#D946EF">Magenta</option>
+                                    <option value="#1F2937">Charcoal</option>
+                                </select>
+                                <div
+                                    style={{
+                                        width: '40px',
+                                        height: '40px',
+                                        backgroundColor: settings.headerBgColor || '#1D4ED8',
+                                        borderRadius: '50%',
+                                        border: '2px solid #ddd',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                    }}
+                                    title="Color preview"
+                                ></div>
+                                <button
+                                    type="button"
+                                    className="btn-save-whatsapp"
+                                    onClick={saveAllChanges}
+                                    style={{ marginLeft: 'auto' }}
+                                >
+                                    Save Color
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Banner Section */}

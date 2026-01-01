@@ -667,7 +667,10 @@ const Client = () => {
       <Toaster position="top-center" />
 
       {/* HEADER */}
-      <div className="header">
+      <div 
+        className="header"
+        style={{ backgroundColor: settings.headerBgColor || '#1D4ED8' }}
+      >
         <img
           src={settings.companyLogo || "https://placehold.co/100x50/4F46E5/ffffff?text=Company+Logo"}
           alt="Company Logo"

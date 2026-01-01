@@ -103,6 +103,7 @@ export const AdminDataProvider = ({ children }) => {
         id: s.id || null,
         headerTitle: s.header_title || '',
         whatsappNumber: s.whatsapp_number || '',
+        headerBgColor: s.header_bg_color || '#1D4ED8',
         companyLogo: s.company_logo_url || '',
         deliveryImage: s.delivery_image_url || '',
         banners: (s.banners || []).map(url => ({ path: url, newFile: null })),
@@ -347,6 +348,7 @@ export const AdminDataProvider = ({ children }) => {
             settingsFormData.append('id', settings.id || '');
             settingsFormData.append('header_title', settings.headerTitle || '');
             settingsFormData.append('whatsapp_number', settings.whatsappNumber || '');
+            settingsFormData.append('header_bg_color', settings.headerBgColor || '#1D4ED8');
             if (settings.companyLogoFile) settingsFormData.append('companyLogoFile', settings.companyLogoFile);
             if (settings.deliveryImageFile) settingsFormData.append('deliveryImageFile', settings.deliveryImageFile);
             if (settings.advertisementVideoFile) { settingsFormData.append('advertisementVideoFile', settings.advertisementVideoFile); }

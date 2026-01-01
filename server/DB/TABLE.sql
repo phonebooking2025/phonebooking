@@ -118,6 +118,7 @@ create table public.settings (
   updated_at timestamp with time zone null default now(),
   advertisement_video_url text null,
   whatsapp_number text null,
+  header_bg_color character varying(7) null default '#1D4ED8'::character varying,
   constraint settings_pkey primary key (id)
 ) TABLESPACE pg_default;
 
