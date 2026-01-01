@@ -331,16 +331,30 @@ const AdminContent = () => {
                                     onChange={(e) => handleSettingsChange('headerBgColor', e.target.value)}
                                     style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px' }}
                                 >
-                                    <option value="#1D4ED8">Deep Blue</option>
-                                    <option value="#DC2626">Crimson Red</option>
-                                    <option value="#059669">Emerald Green</option>
-                                    <option value="#7C3AED">Royal Purple</option>
-                                    <option value="#0891B2">Cyan</option>
-                                    <option value="#EA580C">Deep Orange</option>
-                                    <option value="#0F766E">Teal</option>
-                                    <option value="#6366F1">Indigo</option>
-                                    <option value="#D946EF">Magenta</option>
-                                    <option value="#1F2937">Charcoal</option>
+                                    <optgroup label="Customer Colors">
+                                        <option value="#E74C3C">Red</option>
+                                        <option value="#FF9500">Orange</option>
+                                        <option value="#27AE60">Green</option>
+                                        <option value="#3498DB">Sky Blue</option>
+                                        <option value="#2C3E50">Dark Blue</option>
+                                        <option value="#8B4513">Brown</option>
+                                        <option value="#34495E">Dark Gray</option>
+                                        <option value="#E67E22">Burnt Orange</option>
+                                        <option value="#16A085">Teal Green</option>
+                                        <option value="#C0392B">Dark Red</option>
+                                    </optgroup>
+                                    <optgroup label="Premium Colors">
+                                        <option value="#1D4ED8">Deep Blue</option>
+                                        <option value="#DC2626">Crimson Red</option>
+                                        <option value="#059669">Emerald Green</option>
+                                        <option value="#7C3AED">Royal Purple</option>
+                                        <option value="#0891B2">Cyan</option>
+                                        <option value="#EA580C">Deep Orange</option>
+                                        <option value="#0F766E">Teal</option>
+                                        <option value="#6366F1">Indigo</option>
+                                        <option value="#D946EF">Magenta</option>
+                                        <option value="#1F2937">Charcoal</option>
+                                    </optgroup>
                                 </select>
                                 <div
                                     style={{

@@ -423,59 +423,143 @@
 
 .analyticsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
 .analyticsCard {
   background: var(--bg-secondary);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 32px 28px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: var(--shadow-md);
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: var(--transition);
-  border-left: 4px solid;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-height: 140px;
 }
 
-.analyticsCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+.analyticsCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, currentColor 0%, transparent 100%);
+  opacity: 0;
+  transition: var(--transition);
 }
 
-.analyticsmobile {
-  border-left-color: var(--accent-blue);
+
+.analyticsCard:hover::before {
+  opacity: 1;
 }
 
-.analyticsother {
-  border-left-color: var(--accent-purple);
+.cardBackground {
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: var(--transition);
+  pointer-events: none;
 }
 
-.analyticsorders {
-  border-left-color: var(--accent-green);
+.analyticsCard:hover .cardBackground {
+  opacity: 1;
 }
 
-.analyticsrevenue {
-  border-left-color: var(--accent-orange);
+.cardGradient {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  opacity: 0.05;
+  pointer-events: none;
 }
 
-.analyticsusers {
-  border-left-color: var(--accent-cyan);
+.analyticsCard.analyticsmobile .cardGradient {
+  background: var(--accent-blue);
 }
 
-.analyticsdelivered {
-  border-left-color: var(--accent-green);
+.analyticsCard.analyticsother .cardGradient {
+  background: var(--accent-purple);
+}
+
+.analyticsCard.analyticsorders .cardGradient {
+  background: var(--accent-green);
+}
+
+.analyticsCard.analyticsrevenue .cardGradient {
+  background: var(--accent-orange);
+}
+
+.analyticsCard.analyticsusers .cardGradient {
+  background: var(--accent-cyan);
+}
+
+.analyticsCard.analyticsdelivered .cardGradient {
+  background: var(--accent-green);
+}
+
+.cardIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.analyticsCard.analyticsmobile .cardIconWrapper {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.analyticsCard.analyticsother .cardIconWrapper {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.analyticsCard.analyticsorders .cardIconWrapper {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.analyticsCard.analyticsrevenue .cardIconWrapper {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.analyticsCard.analyticsusers .cardIconWrapper {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.analyticsCard.analyticsdelivered .cardIconWrapper {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .cardIcon {
-  font-size: 32px;
+  font-size: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--accent-blue);
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .analyticsCard.analyticsmobile .cardIcon {
@@ -505,22 +589,28 @@
 .cardContent {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  flex: 1;
+  position: relative;
+  z-index: 2;
 }
 
-.cardContent small {
+.cardTitle {
   color: var(--text-secondary);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.7px;
+  opacity: 0.8;
 }
 
-.cardContent h3 {
-  font-size: 28px;
-  font-weight: 700;
+.cardValue {
+  font-size: 32px;
+  font-weight: 800;
   color: var(--text-primary);
   margin: 0;
+  line-height: 1.1;
+  letter-spacing: -1px;
 }
 
 /* ======== SUPPORT SECTION ======== */
@@ -1391,7 +1481,12 @@
 /* ======== RESPONSIVE DESIGN ======== */
 @media (max-width: 1024px) {
   .analyticsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .analyticsCard {
+    padding: 28px 24px;
   }
 
   .productGrid {
@@ -1438,7 +1533,8 @@
   }
 
   .analyticsCard {
-    padding: 16px;
+    padding: 20px 16px;
+    min-height: 130px;
   }
 
   .cardContent h3 {
@@ -1497,20 +1593,37 @@
   }
 
   .analyticsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 
   .analyticsCard {
-    padding: 14px;
+    padding: 16px 12px;
     gap: 12px;
+    min-height: 120px;
+  }
+
+  .cardIconWrapper {
+    width: 50px;
+    height: 50px;
+  }
+
+  .cardIcon {
+    font-size: 20px;
+  }
+
+  .cardTitle {
+    font-size: 11px;
+    letter-spacing: 0.5px;
   }
 
   .cardContent small {
-    font-size: 11px;
+    font-size: 8px;
   }
 
   .cardContent h3 {
-    font-size: 20px;
+    font-size: 14px;
+    font-weight: 700;
   }
 
   .productGrid {

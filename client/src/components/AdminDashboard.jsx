@@ -209,10 +209,10 @@ const DashboardContent = () => {
             <div className={styles.insightsView}>
               <div className={styles.analyticsGrid}>
                 <AnalyticsCard
-                  title="Total Mobiles"
-                  value={totalMobileItems}
-                  icon={<FiPhone />}
-                  color="mobile"
+                  title="Total Revenue"
+                  value={`₹${totalPrice.toLocaleString()}`}
+                  icon={<FiTrendingUp />}
+                  color="revenue"
                 />
                 <AnalyticsCard
                   title="Other Items"
@@ -221,16 +221,16 @@ const DashboardContent = () => {
                   color="other"
                 />
                 <AnalyticsCard
+                  title="Mobiles Items"
+                  value={totalMobileItems}
+                  icon={<FiPhone />}
+                  color="mobile"
+                />
+                <AnalyticsCard
                   title="Total Orders"
                   value={totalOrders}
                   icon={<FiShoppingBag />}
                   color="orders"
-                />
-                <AnalyticsCard
-                  title="Total Revenue"
-                  value={`₹${totalPrice.toLocaleString()}`}
-                  icon={<FiTrendingUp />}
-                  color="revenue"
                 />
                 <AnalyticsCard
                   title="Total Users"
@@ -548,11 +548,15 @@ const DashboardContent = () => {
 // ===== ANALYTICS CARD COMPONENT =====
 const AnalyticsCard = ({ title, value, icon, color }) => (
   <div className={`${styles.analyticsCard} ${styles[`analytics${color?.charAt(0).toUpperCase() + color?.slice(1)}`]}`}>
-    <div className={styles.cardIcon}>{icon}</div>
-    <div className={styles.cardContent}>
-      <small>{title}</small>
-      <h3>{value}</h3>
+    <div className={styles.cardBackground}></div>
+    <div className={styles.cardIconWrapper}>
+      <div className={styles.cardIcon}>{icon}</div>
     </div>
+    <div className={styles.cardContent}>
+      <small className={styles.cardTitle}>{title}</small>
+      <h3 className={styles.cardValue}>{value}</h3>
+    </div>
+    <div className={styles.cardGradient}></div>
   </div>
 );
 
