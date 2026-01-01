@@ -505,9 +505,36 @@ const AdminContent = () => {
                                     <input
                                         type="number"
                                         value={item.downPaymentAmount || ""}
-                                        onChange={(e) => handleProductChange(index, "downPaymentAmount", e.target.value, "precious")}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "downPaymentAmount", e.target.value, "precious")
+                                        }
                                     />
                                 </div>
+
+                                <div className="form-group">
+                                    <label>Buy 1 Get 1 Free Offer</label>
+                                    <select
+                                        value={item.buyOneGetOne || "No"}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "buyOneGetOne", e.target.value, "precious")
+                                        }
+                                    >
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Buy 1 Get 1 Offer End (date & time)</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={item.offerEndDateTime || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "offerEndDateTime", e.target.value, "precious")
+                                        }
+                                    />
+                                </div>
+
 
                                 <div className="form-group">
                                     <label>Offer (%)</label>
@@ -573,6 +600,22 @@ const AdminContent = () => {
                                                 e.target.files[0],
                                                 "precious"
                                             )
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Product Video</label>
+                                    {(item.productVideo || item.productVideoFile) && (
+                                        <div>
+                                            <small>Video loaded: {item.productVideoFile?.name || 'Existing video'}</small>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={(e) =>
+                                            handleProductChange(index, "productVideoFile", e.target.files[0], "precious")
                                         }
                                     />
                                 </div>
@@ -684,15 +727,41 @@ const AdminContent = () => {
                                         onChange={(e) => handleProductChange(index, "emiMonths", e.target.value, "other")}
                                     />
                                 </div>
-
                                 <div className="form-group">
                                     <label>Down Payment Amount (INR)</label>
                                     <input
                                         type="number"
                                         value={item.downPaymentAmount || ""}
-                                        onChange={(e) => handleProductChange(index, "downPaymentAmount", e.target.value, "other")}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "downPaymentAmount", e.target.value, "other")
+                                        }
                                     />
                                 </div>
+
+                                <div className="form-group">
+                                    <label>Buy 1 Get 1 Free Offer</label>
+                                    <select
+                                        value={item.buyOneGetOne || "No"}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "buyOneGetOne", e.target.value, "other")
+                                        }
+                                    >
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Buy 1 Get 1 Offer End (date & time)</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={item.offerEndDateTime || ""}
+                                        onChange={(e) =>
+                                            handleProductChange(index, "offerEndDateTime", e.target.value, "other")
+                                        }
+                                    />
+                                </div>
+
 
                                 <div className="form-group">
                                     <label>Offer (%)</label>
@@ -771,6 +840,37 @@ const AdminContent = () => {
                                                 e.target.files[0],
                                                 "other"
                                             )
+                                        }
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Product Video</label>
+                                    {(item.productVideo || item.productVideoFile) && (
+                                        <div>
+                                            <small>Video loaded: {item.productVideoFile?.name || 'Existing video'}</small>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={(e) =>
+                                            handleProductChange(index, "productVideoFile", e.target.files[0], "other")
+                                        }
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Product Video</label>
+                                    {(item.productVideo || item.productVideoFile) && (
+                                        <div>
+                                            <small>Video loaded: {item.productVideoFile?.name || 'Existing video'}</small>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={(e) =>
+                                            handleProductChange(index, "productVideoFile", e.target.files[0], "other")
                                         }
                                     />
                                 </div>

@@ -277,10 +277,13 @@ const Client = () => {
   const [netpayForm, setNetpayForm] = useState({
     name: loggedInUser?.username || '',
     mobile: loggedInUser?.phone || '',
-    address: ''
+    address: '',
+    aadhar: '',
+    bankDetails: ''
   });
 
   const netpayScreenshotRef = useRef(null);
+  const userPhotoRef = useRef(null);
   const navigate = useNavigate();
 
   // ==================== DATA PROCESSING ====================
@@ -413,6 +416,8 @@ const Client = () => {
       name: netpayForm.name,
       mobile: netpayForm.mobile,
       address: netpayForm.address,
+      aadhar: netpayForm.aadhar || '',
+      bankDetails: netpayForm.bankDetails || '',
       model: currentBookingModel.model,
       amount: currentBookingModel.netpayPrice,
       emiMonths: emiSelectedMonths || currentBookingModel?.emiMonths || '',
@@ -436,6 +441,11 @@ const Client = () => {
       formData.append('product_name', pendingEmi.model);
       formData.append('mobile', pendingEmi.mobile);
       formData.append('address', pendingEmi.address);
+      formData.append('aadhar', pendingEmi.aadhar || '');
+      formData.append('bank_details', pendingEmi.bankDetails || '');
+      if (userPhotoRef.current && userPhotoRef.current.files.length > 0) {
+        formData.append('user_photo', userPhotoRef.current.files[0]);
+      }
       formData.append('amount', pendingEmi.amount);
       formData.append('emi_months', pendingEmi.emiMonths);
       formData.append('down_payment', pendingEmi.downPayment);
@@ -532,6 +542,9 @@ const Client = () => {
 
   const renderProductCard = (product, index) => (
     <div className="product-card" key={product.id || `product-${index}`}>
+      {product.buyOneGetOne === 'Yes' && (
+        <div className="b1g1-badge">BUY 1 GET 1</div>
+      )}
       {product.offer && (
         <div className="offer-circle">
           <span className="offer-text">{product.offer}%</span>
@@ -776,6 +789,12 @@ const Client = () => {
               <h4>Item Full Details:</h4>
               <p className="item-specs">{currentBookingModel.fullSpecs || 'No details available.'}</p>
               <h3 className="netpay-price">Netpay Price: INR {currentBookingModel.netpayPrice}</h3>
+              {currentBookingModel.buyOneGetOne === 'Yes' && (
+                <div className="b1g1-detail-box">
+                  <h4 style={{ color: '#E91E63' }}>BUY 1 GET 1 FREE</h4>
+                  <p style={{ margin: 0 }}>Offer Ends On: {currentBookingModel.offerEndDateTime ? new Date(currentBookingModel.offerEndDateTime).toLocaleString() : 'Limited Time'}</p>
+                </div>
+              )}
             </div>
             <button onClick={() => showPage('netpay-info-page')} className="btn-primary">Proceed to Checkout</button>
           </div>
@@ -835,6 +854,12 @@ const Client = () => {
               <h4>Item Full Details:</h4>
               <p className="item-specs">{currentBookingModel.fullSpecs || 'No details available.'}</p>
               <h3 className="netpay-price">Netpay Price: INR {currentBookingModel.netpayPrice}</h3>
+              {currentBookingModel.buyOneGetOne === 'Yes' && (
+                <div className="b1g1-detail-box">
+                  <h4 style={{ color: '#E91E63' }}>BUY 1 GET 1 FREE</h4>
+                  <p style={{ margin: 0 }}>Offer Ends On: {currentBookingModel.offerEndDateTime ? new Date(currentBookingModel.offerEndDateTime).toLocaleString() : 'Limited Time'}</p>
+                </div>
+              )}
             </div>
 
             <h3>Choose EMI Plan</h3>
@@ -849,6 +874,21 @@ const Client = () => {
               <div className="form-group">
                 <label>Down Payment (INR):</label>
                 <input type="number" value={emiDownPaymentInput} onChange={(e) => setEmiDownPaymentInput(e.target.value)} placeholder={currentBookingModel.downPaymentAmount || '0'} />
+              </div>
+
+              <div className="form-group">
+                <label>Aadhar / Driving License Number:</label>
+                <input type="text" value={netpayForm.aadhar} onChange={handleNetpayFormChange} id="netpay-user-aadhar" placeholder="Enter Aadhar or DL number" />
+              </div>
+
+              <div className="form-group">
+                <label>Bank Details:</label>
+                <textarea rows="2" value={netpayForm.bankDetails} onChange={handleNetpayFormChange} id="netpay-user-bankDetails" placeholder="Enter bank name / account / IFSC"></textarea>
+              </div>
+
+              <div className="form-group">
+                <label>Your Photo (for EMI verification):</label>
+                <input type="file" accept="image/*" ref={userPhotoRef} />
               </div>
 
               <div className="form-group">

@@ -64,6 +64,9 @@ export const ClientDataProvider = ({ children }) => {
     fullSpecs: p.fullSpecs,
     image: p.image,
     netpayQrCode: p.netpayQrCode,
+    productVideo: p.productVideo || null,
+    buyOneGetOne: p.buyOneGetOne || 'No',
+    offerEndDateTime: p.offerEndDateTime || null,
     createdAt: p.createdAt,
   });
 

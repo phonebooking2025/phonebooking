@@ -21,6 +21,7 @@ router.post(
     upload.fields([
         { name: "imageFile", maxCount: 1 },
         { name: "netpayQrCodeFile", maxCount: 1 },
+        { name: "productVideoFile", maxCount: 1 },
     ]),
     async (req, res) => {
         try {
@@ -36,6 +37,11 @@ router.post(
                 fullSpecs,
                 image,
                 netpayQrCode,
+                productVideo,
+                buyOneGetOne,
+                offerEndDateTime,
+                emiMonths,
+                downPaymentAmount,
             } = req.body;
 
             if (!category || !model)
@@ -72,6 +78,27 @@ router.post(
                 } catch (err) { }
             }
 
+            let product_video_url = productVideo || existing?.product_video || null;
+            if (req.files?.productVideoFile?.[0]) {
+                try {
+                    product_video_url = await uploadToCloudinary(
+                        req.files.productVideoFile[0].buffer,
+                        "product_videos"
+                    );
+                } catch (err) { }
+            }
+
+            // Convert offer end datetime
+            let offer_end_datetime = null;
+            if (offerEndDateTime) {
+                const dt = new Date(offerEndDateTime);
+                if (!isNaN(dt.getTime())) {
+                    offer_end_datetime = dt.toISOString();
+                }
+            } else {
+                offer_end_datetime = existing?.offer_end_date_time || null;
+            }
+
             // Convert datetime-local format (YYYY-MM-DDTHH:MM) to ISO timestamp
             let offer_time_value = null;
             if (offerTime) {
@@ -100,8 +127,11 @@ router.post(
                 full_specs: fullSpecs || existing?.full_specs || null,
                 image_url,
                 netpay_qr_url,
-                emi_months: req.body.emiMonths || existing?.emi_months || null,
-                down_payment_amount: req.body.downPaymentAmount ? parseFloat(req.body.downPaymentAmount) : (existing?.down_payment_amount || null),
+                product_video: product_video_url,
+                buy_one_get_one: buyOneGetOne || existing?.buy_one_get_one || 'No',
+                offer_end_date_time: offer_end_datetime,
+                emi_months: emiMonths || existing?.emi_months || null,
+                down_payment_amount: downPaymentAmount ? parseFloat(downPaymentAmount) : (existing?.down_payment_amount || null),
             };
 
             if (id) productObj.id = id;
@@ -160,6 +190,9 @@ router.get("/:category", async (req, res) => {
                 netpayQrCode: p.netpay_qr_url,
                 emiMonths: p.emi_months || '',
                 downPaymentAmount: p.down_payment_amount || null,
+                productVideo: p.product_video || null,
+                buyOneGetOne: p.buy_one_get_one || 'No',
+                offerEndDateTime: p.offer_end_date_time || null,
                 createdAt: p.created_at,
             };
         });

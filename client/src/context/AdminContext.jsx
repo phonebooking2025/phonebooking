@@ -66,6 +66,10 @@ export const AdminDataProvider = ({ children }) => {
         netpayQrCodeFile: null,
         emiMonths: p.emiMonths || '',
         downPaymentAmount: p.downPaymentAmount || null,
+        productVideo: p.productVideo || null,
+        productVideoFile: null,
+        buyOneGetOne: p.buyOneGetOne || 'No',
+        offerEndDateTime: p.offerEndDateTime || '',
         createdAt: p.createdAt
     });
 
@@ -225,7 +229,11 @@ export const AdminDataProvider = ({ children }) => {
             imageFile: null,
             netpayQrCodeFile: null
             , emiMonths: '',
-            downPaymentAmount: null
+            downPaymentAmount: null,
+            productVideo: null,
+            productVideoFile: null,
+            buyOneGetOne: 'No',
+            offerEndDateTime: ''
         };
         category === 'precious' ? setPreciousItems(prev => [...prev, newItem]) : setOtherItems(prev => [...prev, newItem]);
     };
@@ -363,6 +371,10 @@ export const AdminDataProvider = ({ children }) => {
                 formData.append('downPaymentAmount', toNumberOrNull(item.downPaymentAmount));
                 if (item.imageFile) formData.append('imageFile', item.imageFile);
                 if (item.netpayQrCodeFile) formData.append('netpayQrCodeFile', item.netpayQrCodeFile);
+                formData.append('productVideo', item.productVideo || '');
+                formData.append('buyOneGetOne', item.buyOneGetOne || 'No');
+                formData.append('offerEndDateTime', item.offerEndDateTime || '');
+                if (item.productVideoFile) formData.append('productVideoFile', item.productVideoFile);
                 await axiosInstance.post('/products/admin', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             }
 
