@@ -134,32 +134,53 @@ router.post(
                 );
             }
 
-            const emiPayload = {
+            // Create a base order record first (orders table doesn't have EMI-specific columns)
+            const orderPayload = {
                 user_id: req.user.id,
                 product_id,
-                product_name: product_name || null,
                 amount: parseFloat(amount),
-                user_name,
-                mobile,
-                address,
-                aadhar: aadhar || null,
-                bank_details: bank_details || null,
-                user_photo_url,
-                emi_months: parseInt(emi_months),
-                down_payment: parseFloat(down_payment) || 0,
+                user_name: user_name || null,
                 screenshot_url,
                 delivery_status: "EMI Pending",
+                mobile: mobile || null,
+                address: address || null,
+                emi_type: "EMI",
+                payment_method: "QR",
             };
 
-            const { data, error } = await supabase
+            const { data: orderData, error: orderError } = await supabase
                 .from("orders")
-                .insert([emiPayload])
+                .insert([orderPayload])
                 .select();
 
-            if (error) throw error;
-            await sendAdminNotificationEmail(emiPayload, product_name);
+            if (orderError) throw orderError;
 
-            return res.status(201).json({ order: data[0] });
+            const createdOrder = orderData[0];
+
+            // Insert EMI specific details into emi_applications table and link to order
+            const emiAppPayload = {
+                order_id: createdOrder.id,
+                user_id: req.user.id,
+                aadhar_number: aadhar || null,
+                bank_details: bank_details || null,
+                user_photo_url: user_photo_url || null,
+                emi_months: emi_months ? parseInt(emi_months) : null,
+                down_payment: down_payment ? parseFloat(down_payment) : 0,
+                monthly_emi: null,
+                application_status: 'Pending'
+            };
+
+            const { data: emiData, error: emiError } = await supabase
+                .from("emi_applications")
+                .insert([emiAppPayload])
+                .select();
+
+            if (emiError) throw emiError;
+
+            // Notify admin with combined info
+            await sendAdminNotificationEmail({ ...emiAppPayload, order_id: createdOrder.id }, product_name);
+
+            return res.status(201).json({ order: createdOrder, emi_application: emiData[0] });
         } catch (err) {
             return res.status(500).json({
                 message: "Place EMI order failed",
