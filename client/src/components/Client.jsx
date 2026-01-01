@@ -790,7 +790,7 @@ const Client = () => {
             </span>
 
             <a
-              href="https://drive.google.com/uc?export=download&id=1CjoY8xiDyaqKYJyH2h4-IwXJnMFrypZW"
+              href="https://drive.google.com/file/d/1tToEQX87EDQXqGvnuhYWpk3PCPcDj3Un/view?usp=sharing"
               className="download-btn"
               target="_blank"
               rel="noopener noreferrer"
