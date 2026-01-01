@@ -102,12 +102,12 @@ export const AdminDataProvider = ({ children }) => {
         try {
             setLoading(true);
 
-            const [preciousRes, otherRes, salesRes, settingsRes, messagesRes,] = await Promise.all([
+            const [preciousRes, otherRes, salesRes, settingsRes] = await Promise.all([
                 axiosInstance.get('/products/precious'),
                 axiosInstance.get('/products/other'),
-                axiosInstance.get('/admin/orders'),
+                // Use public orders endpoint for unauthenticated/public fetch
+                axios.get(`${API_URL}/public/orders`),
                 axiosInstance.get('/settings'),
-                axiosInstance.get('/admin/messages/latest-per-user'),
             ]);
 
             setPreciousItems((preciousRes.data || []).map(mapProductFromDb));
@@ -119,18 +119,8 @@ export const AdminDataProvider = ({ children }) => {
             try { localStorage.setItem('website_settings', JSON.stringify(fetchedSettings)); } catch (e) { }
 
             // Corrected latest message mapping
-            const latestMessagesArray = messagesRes.data?.latestMessages || [];
-            if (latestMessagesArray.length > 0) {
-                const latestMessage = latestMessagesArray.reduce((prev, current) =>
-                    new Date(prev.created_at) > new Date(current.created_at) ? prev : current
-                );
-                setLatestUserMessage({
-                    content: latestMessage?.content || 'No messages from users.',
-                    userId: latestMessage?.user_id || null
-                });
-            } else {
-                setLatestUserMessage({ content: 'No messages found.', userId: null });
-            }
+            // No admin-only messages in public fetch; show default
+            setLatestUserMessage({ content: 'No messages found.', userId: null });
 
             setError(null);
         } catch (err) {

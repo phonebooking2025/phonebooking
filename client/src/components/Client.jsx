@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
-import { useAdminData } from '../context/AdminContext';
+import { useClientData } from '../context/ClientContext';
 import "./Client.css";
 import { Toaster, toast } from 'react-hot-toast';
 import Loading from './Loading';
@@ -237,7 +237,11 @@ const Client = () => {
     adminReplyContent: adminSms,
     setNetpaySales,
     fetchPublicData,
-  } = useAdminData();
+    sendMessage,
+    placeOrder,
+    placeNetpayOrder,
+    fetchUserMessages,
+  } = useClientData();
 
   // ==================== LIFECYCLE - FETCH DATA ====================
   useEffect(() => {
@@ -356,13 +360,11 @@ const Client = () => {
     }
 
     try {
-      await axiosInstance.post('/messages/send', {
-        content: smsContent,
-      });
-
+      await sendMessage(smsContent);
       if (!isInternal) toast.success('Your message has been sent to the admin.');
       setUserSmsReply('');
-
+      // refresh latest admin reply for logged in user
+      try { await fetchUserMessages(); } catch (e) { }
     } catch (error) {
       console.error('SMS API Error:', error.response?.data || error.message);
       toast.error('Failed to send message. Please log in again.');
@@ -439,7 +441,7 @@ const Client = () => {
       formData.append('down_payment', pendingEmi.downPayment);
       formData.append('screenshot', file);
 
-      const response = await axiosInstance.post('/orders/place', formData);
+      const response = await placeOrder(formData);
 
       setPendingEmi(null);
       setNetpayForm(prev => ({ ...prev, address: '' }));
@@ -487,7 +489,7 @@ const Client = () => {
       formData.append('amount', pendingNetpay.amount);
       formData.append('screenshot', file);
 
-      const response = await axiosInstance.post('/orders/place', formData);
+      const response = await placeOrder(formData);
 
       const newOrder = response.data?.order;
       if (newOrder) {
@@ -528,8 +530,8 @@ const Client = () => {
   };
 
 
-  const renderProductCard = (product) => (
-    <div className="product-card" key={product.id}>
+  const renderProductCard = (product, index) => (
+    <div className="product-card" key={product.id || `product-${index}`}>
       {product.offer && (
         <div className="offer-circle">
           <span className="offer-text">{product.offer}%</span>
@@ -651,7 +653,7 @@ const Client = () => {
         <div className="banner-carousel">
           <div className="carousel-track" style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}>
             {settings.banners.map((banner, index) => banner.path && (
-              <div className="carousel-slide" key={index}>
+              <div className="carousel-slide" key={banner.path || `banner-${index}`}>
                 <img src={banner.path} alt={`Promotional Banner ${index + 1}`} />
               </div>
             ))}
@@ -667,14 +669,14 @@ const Client = () => {
             <div className="product-section left-section">
               <h2 className="section-title items-section">Mobile Items</h2>
               <div className="product-list grid-cards">
-                {mobileData.map(renderProductCard)}
+                {mobileData.map((p, i) => renderProductCard(p, i))}
               </div>
             </div>
 
             <div className="product-section right-section">
               <h2 className="section-title items-section">Other Items</h2>
               <div className="product-list grid-cards">
-                {homeAppliancesData.map(renderProductCard)}
+                {homeAppliancesData.map((p, i) => renderProductCard(p, i))}
               </div>
             </div>
           </div>
@@ -763,7 +765,7 @@ const Client = () => {
         {/*------------------- HOME PAGE END ------------------- */}
 
         {/* NETPAY WORKFLOW PAGES */}
-        {currentBookingModel && <>
+        {currentBookingModel && activePage?.startsWith('netpay') && <>
           {/* Netpay Details Page */}
           <div id="netpay-details-page" className={`page ${activePage === 'netpay-details-page' ? 'active' : ''}`}>
             <button onClick={() => showPage('home-page')} className="btn-back">← Back to Home</button>
@@ -823,7 +825,7 @@ const Client = () => {
         </>}
 
         {/* EMI WORKFLOW PAGES */}
-        {currentBookingModel && <>
+        {currentBookingModel && activePage?.startsWith('emi') && <>
           <div id="emi-details-page" className={`page ${activePage === 'emi-details-page' ? 'active' : ''}`}>
             <button onClick={() => showPage('home-page')} className="btn-back">← Back to Home</button>
             <h2>EMI Purchase</h2>
