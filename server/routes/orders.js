@@ -110,6 +110,10 @@ router.post(
     verifyToken,
     upload.fields([{ name: "screenshot", maxCount: 1 }, { name: "user_photo", maxCount: 1 }]),
     async (req, res) => {
+        // Add diagnostics to help trace 500 errors
+        console.log('[EMI] incoming request body keys:', Object.keys(req.body || {}));
+        console.log('[EMI] files present:', Object.keys(req.files || {}));
+
         try {
             const { product_id, product_name, user_name, mobile, address, aadhar, bank_details, amount, emi_months, down_payment } = req.body;
 
@@ -120,21 +124,31 @@ router.post(
             let screenshot_url = null;
             let user_photo_url = null;
 
-            if (req.files?.screenshot?.[0]) {
-                screenshot_url = await uploadToCloudinary(
-                    req.files.screenshot[0].buffer,
-                    "orders/emi/screenshots"
-                );
+            try {
+                if (req.files?.screenshot?.[0]) {
+                    screenshot_url = await uploadToCloudinary(
+                        req.files.screenshot[0].buffer,
+                        "orders/emi/screenshots"
+                    );
+                }
+            } catch (upErr) {
+                console.error('[EMI] screenshot upload failed:', upErr);
+                return res.status(500).json({ message: 'Screenshot upload failed', details: String(upErr.message || upErr) });
             }
 
-            if (req.files?.user_photo?.[0]) {
-                user_photo_url = await uploadToCloudinary(
-                    req.files.user_photo[0].buffer,
-                    "orders/emi/photos"
-                );
+            try {
+                if (req.files?.user_photo?.[0]) {
+                    user_photo_url = await uploadToCloudinary(
+                        req.files.user_photo[0].buffer,
+                        "orders/emi/photos"
+                    );
+                }
+            } catch (upErr) {
+                console.error('[EMI] user photo upload failed:', upErr);
+                return res.status(500).json({ message: 'User photo upload failed', details: String(upErr.message || upErr) });
             }
 
-            // Create a base order record first (orders table doesn't have EMI-specific columns)
+            // Create a base order record first
             const orderPayload = {
                 user_id: req.user.id,
                 product_id,
@@ -148,16 +162,21 @@ router.post(
                 payment_method: "QR",
             };
 
-            const { data: orderData, error: orderError } = await supabase
-                .from("orders")
-                .insert([orderPayload])
-                .select();
+            let createdOrder;
+            try {
+                const { data: orderData, error: orderError } = await supabase
+                    .from("orders")
+                    .insert([orderPayload])
+                    .select();
 
-            if (orderError) throw orderError;
+                if (orderError) throw orderError;
+                createdOrder = orderData[0];
+            } catch (dbErr) {
+                console.error('[EMI] orders insert failed:', dbErr);
+                return res.status(500).json({ message: 'Failed to create order', details: String(dbErr.message || dbErr) });
+            }
 
-            const createdOrder = orderData[0];
-
-            // Insert EMI specific details into emi_applications table and link to order
+            // Insert EMI specific details into emi_applications table
             const emiAppPayload = {
                 order_id: createdOrder.id,
                 user_id: req.user.id,
@@ -170,21 +189,34 @@ router.post(
                 application_status: 'Pending'
             };
 
-            const { data: emiData, error: emiError } = await supabase
-                .from("emi_applications")
-                .insert([emiAppPayload])
-                .select();
+            let emiApplication;
+            try {
+                const { data: emiData, error: emiError } = await supabase
+                    .from("emi_applications")
+                    .insert([emiAppPayload])
+                    .select();
 
-            if (emiError) throw emiError;
+                if (emiError) throw emiError;
+                emiApplication = emiData[0];
+            } catch (dbErr) {
+                console.error('[EMI] emi_applications insert failed:', dbErr);
+                // Attempt to rollback order? For now, return an error and leave order record (could implement rollback later)
+                return res.status(500).json({ message: 'Failed to create EMI application', details: String(dbErr.message || dbErr) });
+            }
 
-            // Notify admin with combined info
-            await sendAdminNotificationEmail({ ...emiAppPayload, order_id: createdOrder.id }, product_name);
+            // Notify admin but don't fail the request if notification errors
+            try {
+                await sendAdminNotificationEmail({ ...emiAppPayload, order_id: createdOrder.id }, product_name);
+            } catch (notifyErr) {
+                console.error('[EMI] notification failed:', notifyErr);
+            }
 
-            return res.status(201).json({ order: createdOrder, emi_application: emiData[0] });
+            return res.status(201).json({ order: createdOrder, emi_application: emiApplication });
         } catch (err) {
+            console.error('[EMI] unhandled error:', err);
             return res.status(500).json({
                 message: "Place EMI order failed",
-                details: err.message,
+                details: String(err.message || err),
             });
         }
     }
