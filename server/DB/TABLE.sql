@@ -71,7 +71,13 @@ create table public.orders (
   constraint orders_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE,
   constraint orders_delivery_status_check check (
     (
-      delivery_status = any (array['Pending'::text, 'Confirmed'::text])
+      delivery_status = any (
+        array[
+          'Pending'::text,
+          'Confirmed'::text,
+          'EMI Pending'::text
+        ]
+      )
     )
   )
 ) TABLESPACE pg_default;

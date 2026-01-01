@@ -155,7 +155,8 @@ router.post(
                 amount: parseFloat(amount),
                 user_name: user_name || null,
                 screenshot_url,
-                delivery_status: "EMI Pending",
+                // use allowed delivery_status values (Pending|Confirmed) per DB constraint
+                delivery_status: "Pending",
                 mobile: mobile || null,
                 address: address || null,
                 emi_type: "EMI",
