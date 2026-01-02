@@ -978,6 +978,140 @@
   letter-spacing: 0.3px;
 }
 
+/* ======== USERS VIEW ======== */
+.usersView {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.userCount {
+  background: var(--accent-cyan);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.usersList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.userRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.userRow:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.userName {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.userPhone {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.userDeleteBtn {
+  padding: 8px;
+  width: 40px;
+  height: 36px;
+  background: transparent;
+  color: var(--accent-red);
+  border: 1px solid rgba(239, 68, 68, 0.12);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.userDeleteBtn:hover {
+  background: rgba(239, 68, 68, 0.06);
+  transform: translateY(-2px);
+}
+
+/* ======== CONFIRM MODAL ======== */
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.confirmModal {
+  width: 320px;
+  background: var(--bg-secondary);
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.confirmModal h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.confirmModal p {
+  margin: 0 0 16px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.confirmYes {
+  padding: 8px 14px;
+  background: var(--accent-red);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.confirmNo {
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
 .orderValue {
   font-size: 14px;
   font-weight: 500;

@@ -70,6 +70,7 @@ const DashboardContent = () => {
   const sidebarRef = useRef(null);
   const scrollAreaRef = useRef(null);
   const [showScrollButtons, setShowScrollButtons] = useState({ up: false, down: false });
+  const [confirmUser, setConfirmUser] = useState(null);
 
   // Scroll detection
   const handleScroll = () => {
@@ -385,10 +386,12 @@ const DashboardContent = () => {
                 <div className={styles.usersList}>
                   {users.map(u => (
                     <div key={u.id} className={styles.userRow}>
-                      <div className={styles.userName}>{u.name || '—'}</div>
-                      <div className={styles.userPhone}>{u.phone || '—'}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div className={styles.userName}>{u.name || '—'}</div>
+                        <div className={styles.userPhone}>{u.phone || '—'}</div>
+                      </div>
                       <div className={styles.userActions}>
-                        <button className={styles.deleteBtn} onClick={() => deleteUser(u.id)} title="Delete user">
+                        <button className={styles.userDeleteBtn} onClick={() => setConfirmUser({ id: u.id, name: u.name })} title="Delete user">
                           <FiTrash2 />
                         </button>
                       </div>
@@ -549,6 +552,20 @@ const DashboardContent = () => {
             <FiSave size={18} /> Save All Changes
           </button>
         </div>
+
+        {/* CONFIRM DELETE MODAL */}
+        {confirmUser && (
+          <div className={styles.confirmOverlay} onClick={() => setConfirmUser(null)}>
+            <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
+              <h3>Delete user?</h3>
+              <p>Are you sure you want to delete <strong>{confirmUser.name || 'this user'}</strong>?</p>
+              <div className={styles.confirmButtons}>
+                <button className={styles.confirmNo} onClick={() => setConfirmUser(null)}>No</button>
+                <button className={styles.confirmYes} onClick={async () => { await deleteUser(confirmUser.id); setConfirmUser(null); }}>Yes</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* SCROLL NAVIGATION BUTTONS */}
         {showScrollButtons.up && (
