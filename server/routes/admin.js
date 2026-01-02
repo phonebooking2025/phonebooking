@@ -53,7 +53,7 @@ router.post("/login", async (req, res) => {
 
         const token = signToken({
             id: user.id,
-            name: user.name,
+            name: user.username,
             is_admin: user.is_admin,
             phone: user.phone,
         });
@@ -63,7 +63,7 @@ router.post("/login", async (req, res) => {
             token,
             user: {
                 id: user.id,
-                name: user.name,
+                name: user.username,
                 phone: user.phone,
                 is_admin: user.is_admin,
             },
@@ -277,12 +277,14 @@ router.get(
         try {
             const { data, error } = await supabase
                 .from("users")
-                .select("id, name, phone, is_admin, created_at")
+                .select("id, username, phone, is_admin, created_at")
                 .order("created_at", { ascending: false });
 
             if (error) throw error;
 
-            res.json({ users: data });
+            // map username -> name for frontend compatibility
+            const users = (data || []).map(u => ({ id: u.id, name: u.username, phone: u.phone, is_admin: u.is_admin, created_at: u.created_at }));
+            res.json({ users });
         } catch (err) {
             res.status(500).json({ message: "Failed to fetch users", details: err.message });
         }
