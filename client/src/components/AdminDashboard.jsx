@@ -62,7 +62,7 @@ const DashboardContent = () => {
     latestUserMessage = {}, adminReplyContent = "", setAdminReplyContent = () => { },
     settings = {}, loading = false, handleProductChange, addMoreProduct, deleteProduct,
     handleSettingsChange, handleBannerFileChange, addBannerInput, deleteBanner,
-    confirmNetpayDelivery, sendSmsToUser, saveAllChanges
+    confirmNetpayDelivery, markOrderDelivered, cancelOrder, sendSmsToUser, saveAllChanges
   } = useAdminData() || {};
   const { users = [], fetchUsers = () => { }, deleteUser = () => { } } = useAdminData() || {};
 
@@ -71,6 +71,22 @@ const DashboardContent = () => {
   const scrollAreaRef = useRef(null);
   const [showScrollButtons, setShowScrollButtons] = useState({ up: false, down: false });
   const [confirmUser, setConfirmUser] = useState(null);
+
+  // Cancel order modal state
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState(null);
+
+  const handleConfirmCancel = async () => {
+    if (!cancelTarget) return;
+    try {
+      await cancelOrder(cancelTarget);
+    } catch (e) {
+      console.error('Cancel failed', e);
+    } finally {
+      setCancelModalVisible(false);
+      setCancelTarget(null);
+    }
+  };
 
   // Scroll detection
   const handleScroll = () => {
@@ -367,7 +383,7 @@ const DashboardContent = () => {
                       order={order}
                       confirmDelivery={confirmNetpayDelivery}
                       markDelivered={(id) => markOrderDelivered(id)}
-                      cancelOrder={(id) => cancelOrder(id)}
+                      onRequestCancel={(id) => { setCancelTarget(id); setCancelModalVisible(true); }}
                     />
                   ))}
                 </div>
@@ -580,6 +596,20 @@ const DashboardContent = () => {
           </div>
         )}
 
+        {/* CANCEL ORDER MODAL */}
+        {cancelModalVisible && (
+          <div className={styles.cancelOverlay} onClick={() => { setCancelModalVisible(false); setCancelTarget(null); }}>
+            <div className={styles.cancelModal} onClick={e => e.stopPropagation()}>
+              <h3>Cancel Order</h3>
+              <p>Are you sure you want to cancel this order? This action cannot be undone.</p>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 12 }}>
+                <button className={styles.confirmNo} onClick={() => { setCancelModalVisible(false); setCancelTarget(null); }}>No</button>
+                <button className={styles.confirmYes} onClick={handleConfirmCancel}>Yes, Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* SCROLL NAVIGATION BUTTONS */}
         {showScrollButtons.up && (
           <button
@@ -677,7 +707,7 @@ const ProductCard = ({ item, index, type, onDelete, onChange, isEditing, onEdit 
 };
 
 // ===== ORDER CARD COMPONENT =====
-const OrderCard = ({ order, confirmDelivery, markDelivered, cancelOrder }) => {
+const OrderCard = ({ order, confirmDelivery, markDelivered, onRequestCancel }) => {
   const isDelivered = (order.deliveryStatus || order.delivery_status || '').toLowerCase() === "delivered";
   const isCancelled = (order.deliveryStatus || order.delivery_status || '').toLowerCase() === "cancelled";
   return (
@@ -724,7 +754,7 @@ const OrderCard = ({ order, confirmDelivery, markDelivered, cancelOrder }) => {
             <button className={styles.confirmBtn} onClick={() => markDelivered(order.id)}>
               Mark as Delivered
             </button>
-            <button className={styles.cancelBtn} onClick={() => cancelOrder(order.id)}>
+            <button className={styles.cancelBtn} onClick={() => onRequestCancel(order.id)}>
               Cancel Order
             </button>
           </div>
@@ -736,7 +766,20 @@ const OrderCard = ({ order, confirmDelivery, markDelivered, cancelOrder }) => {
 
 // ===== PAYMENT CARD COMPONENT =====
 const PaymentCard = ({ payment }) => {
-  const isDelivered = payment.deliveryStatus === "delivered";
+  const isDelivered = (payment.deliveryStatus || payment.delivery_status || '').toLowerCase() === "delivered";
+
+  // Calculate EMI breakdown for display
+  const getEmiBreakdown = () => {
+    const total = Number(payment.amount || 0);
+    const dp = Number(payment.downPayment || 0);
+    const months = Number(payment.emiMonths || 0);
+    const remaining = Math.max(0, total - dp);
+    const monthly = months > 0 ? (remaining / months) : 0;
+    return { total, dp, months, remaining, monthly: Math.round(monthly * 100) / 100 };
+  };
+
+  const emiBreakdown = payment.emiMonths ? getEmiBreakdown() : null;
+
   return (
     <div className={styles.paymentShortCard}>
       <div className={styles.paymentPriceBar}>
@@ -768,11 +811,25 @@ const PaymentCard = ({ payment }) => {
             <span className={styles.infoValue}>{payment.location}</span>
           </div>
         )}
-        {payment.emiMonths && (
-          <div className={styles.paymentInfoItem}>
-            <span className={styles.infoLabel}>EMI</span>
-            <span className={styles.infoValue}>{payment.emiMonths}m @ ₹{payment.monthlyEmi || 'N/A'}</span>
-          </div>
+        {emiBreakdown && (
+          <>
+            <div className={styles.paymentInfoItem}>
+              <span className={styles.infoLabel}>Down Payment</span>
+              <span className={styles.infoValue}>₹{emiBreakdown.dp.toFixed(2)}</span>
+            </div>
+            <div className={styles.paymentInfoItem}>
+              <span className={styles.infoLabel}>Remaining</span>
+              <span className={styles.infoValue}>₹{emiBreakdown.remaining.toFixed(2)}</span>
+            </div>
+            <div className={styles.paymentInfoItem}>
+              <span className={styles.infoLabel}>Monthly EMI</span>
+              <span className={styles.infoValue}>₹{emiBreakdown.monthly.toFixed(2)}</span>
+            </div>
+            <div className={styles.paymentInfoItem}>
+              <span className={styles.infoLabel}>EMI Duration</span>
+              <span className={styles.infoValue}>{emiBreakdown.months} months</span>
+            </div>
+          </>
         )}
       </div>
     </div>

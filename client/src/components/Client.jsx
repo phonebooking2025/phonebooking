@@ -606,9 +606,6 @@ const Client = () => {
         <p className="price">Netpay: ₹{product.netpayPrice}</p>
         <div className="product-actions">
           <button onClick={() => showNetpayDetails(product.id)} className="btn-netpay">View</button>
-          {product.emiMonths && product.emiMonths.toString().trim() !== '' && (
-            <button onClick={() => showEmiDetails(product.id)} className="btn-emi">EMI</button>
-          )}
         </div>
       </div>
     </div>
@@ -620,18 +617,31 @@ const Client = () => {
       {netpaySales.length > 0 ? netpaySales.map(netpay => {
         const key = `${netpay.id}-${netpay.model}-${new Date(netpay.timestamp || netpay.createdAt).getTime()}`;
         const netpayDate = new Date(netpay.timestamp || netpay.createdAt).toLocaleString();
-        const deliveryStatus = netpay.deliveryStatus === 'Confirmed' ? `Delivery Confirmed` : 'Pending Confirmation';
-        const deliveryMessage = netpay.deliveryStatus === 'Confirmed' ? `Available on: ${netpay.deliveryDate}.` : '';
+        const status = (netpay.deliveryStatus || netpay.delivery_status || 'Pending').toLowerCase();
+
+        let deliveryStatus = 'Pending';
+        let deliveryMessage = '';
+        let statusIcon = '';
+
+        if (status === 'confirmed' || status === 'delivered') {
+          deliveryStatus = 'Delivery Confirmed';
+          deliveryMessage = `Available on: ${netpay.deliveryDate}.`;
+          statusIcon = '✔';
+        } else if (status === 'cancelled') {
+          deliveryStatus = 'Cancelled';
+          statusIcon = '✕';
+        }
+
         return (
           <li className="history-item" key={key}>
             <h4>
               Netpay No: {netpay.id} for {netpay.model}
-              {netpay.deliveryStatus === 'Confirmed' && <span className="tick-mark">✔</span>}
+              {statusIcon && <span className="tick-mark">{statusIcon}</span>}
             </h4>
             <p><strong>Date & Time:</strong> {netpayDate}</p>
             <p><strong>Total Price:</strong> INR {netpay.amount}</p>
             <p><strong>Delivery Status:</strong> {deliveryStatus}</p>
-            <p>{deliveryMessage}</p>
+            {deliveryMessage && <p>{deliveryMessage}</p>}
           </li>
         );
       }) : <li className="no-history">No Netpay history found.</li>}
@@ -849,9 +859,7 @@ const Client = () => {
             </div>
             <div className="purchase-options" style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '20px' }}>
               <button onClick={() => showPage('netpay-info-page')} className="netpay-buy-btn" style={{ flex: 1 }}>Netpay Buy</button>
-              {currentBookingModel.emiMonths && currentBookingModel.emiMonths.toString().trim() !== '' && (
-                <button onClick={() => showPage('emi-details-page')} className="netpay-emi-btn" style={{ flex: 1 }}>EMI Payment</button>
-              )}
+              <button onClick={() => showPage('emi-details-page')} className="netpay-emi-btn" style={{ flex: 1 }}>EMI Payment</button>
             </div>
           </div>
 

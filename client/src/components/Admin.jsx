@@ -1023,11 +1023,24 @@ const AdminContent = () => {
 
                                     {sale.emiType === 'EMI' && (
                                         <div className="emi-details">
-                                            <p><strong>EMI Months:</strong> {sale.emiMonths ?? 'Null'}</p>
-                                            <p><strong>Down Payment:</strong> {sale.downPayment != null ? `₹ ${sale.downPayment}` : 'Null'}</p>
-                                            <p><strong>Monthly EMI:</strong> {sale.monthlyEmi != null ? `₹ ${sale.monthlyEmi}` : 'Null'}</p>
-                                            <p><strong>Aadhar:</strong> {sale.aadhar || 'Null'}</p>
-                                            <p><strong>Bank Details:</strong> {sale.bankDetails || 'Null'}</p>
+                                            {(() => {
+                                                const total = Number(sale.amount || 0);
+                                                const dp = Number(sale.downPayment || 0);
+                                                const months = Number(sale.emiMonths || 0);
+                                                const remaining = Math.max(0, total - dp);
+                                                const monthly = months > 0 ? (remaining / months) : 0;
+                                                return (
+                                                    <>
+                                                        <p><strong>Total Amount:</strong> ₹{total.toFixed(2)}</p>
+                                                        <p><strong>Down Payment:</strong> {dp ? `₹ ${dp.toFixed(2)}` : 'Null'}</p>
+                                                        <p><strong>Remaining Amount:</strong> ₹{remaining.toFixed(2)}</p>
+                                                        <p><strong>EMI Duration:</strong> {months} months</p>
+                                                        <p><strong>Monthly EMI:</strong> ₹{monthly.toFixed(2)}</p>
+                                                        <p><strong>Aadhar:</strong> {sale.aadhar || 'Null'}</p>
+                                                        <p><strong>Bank Details:</strong> {sale.bankDetails || 'Null'}</p>
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     )}
 

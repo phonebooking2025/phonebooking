@@ -378,8 +378,6 @@ export const AdminDataProvider = ({ children }) => {
 
     const cancelOrder = async (orderId) => {
         if (!orderId) return;
-        const ok = window.confirm('Are you sure you want to cancel this order?');
-        if (!ok) return;
         setLoading(true);
         try {
             await axiosInstance.put(`/admin/orders/${orderId}/cancel`);
