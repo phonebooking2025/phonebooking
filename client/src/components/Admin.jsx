@@ -708,7 +708,7 @@ const AdminContent = () => {
 
                     <div className="form-actions admin-form-container">
                         <button className="btn-add-precious" onClick={() => addMoreProduct("precious")}>
-                            + Add More Precious Metal Items
+                            + Add More Mobile Items
                         </button>
                     </div>
 
