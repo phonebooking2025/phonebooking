@@ -4,7 +4,7 @@ import { useAuth, AuthProvider } from "../context/AuthContext";
 import { useAdminData, AdminDataProvider } from "../context/AdminContext";
 import {
   FiGrid, FiLogOut, FiSettings, FiShoppingBag, FiUsers,
-  FiSave, FiSend, FiMenu, FiX, FiPlus, FiTrash2,
+  FiSave, FiSend, FiMenu, FiX, FiPlus, FiTrash2, FiDownload,
   FiMoon, FiSun, FiTrendingUp, FiMessageSquare,
   FiHome, FiCreditCard, FiActivity, FiPhone, FiEdit2,
   FiCheck, FiAlertCircle, FiChevronUp, FiChevronDown
@@ -178,6 +178,7 @@ const DashboardContent = () => {
           <NavItem id="products" icon={MdInventory2} label="Inventory" />
           <NavItem id="orders" icon={FiShoppingBag} label="Orders" />
           <NavItem id="users" icon={FiUsers} label="Users" />
+          <NavItem id="download" icon={FiDownload} label="Download App" />
           <NavItem id="payments" icon={FiCreditCard} label="Payments" />
           <NavItem id="config" icon={FiSettings} label="Config" />
         </nav>
@@ -419,6 +420,17 @@ const DashboardContent = () => {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ===== DOWNLOAD APP TAB ===== */}
+          {activeTab === "download" && (
+            <div className={styles.downloadView}>
+              <div className={styles.downloadCard}>
+                <h2>Download Admin App</h2>
+                <p className={styles.downloadText}>Quickly manage orders and customers from your phone. Download the admin APK to install the mobile admin app on Android devices.</p>
+                <a className={styles.downloadBtn} href="https://drive.google.com/file/d/1RMm5-aGJRAis4tTwT9wzNPLyF4Ta_pN2/view?usp=sharing" target="_blank" rel="noreferrer">Download APK</a>
+              </div>
             </div>
           )}
 
