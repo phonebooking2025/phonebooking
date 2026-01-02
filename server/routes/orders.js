@@ -290,6 +290,52 @@ router.put(
     }
 );
 
+// ============ MARK ORDER DELIVERED ============
+router.put(
+    "/admin/orders/:id/deliver",
+    verifyToken,
+    requireAdmin,
+    async (req, res) => {
+        try {
+            const deliveryDate = new Date();
+            const { data, error } = await supabase
+                .from("orders")
+                .update({
+                    delivery_status: "Delivered",
+                    delivery_date: deliveryDate.toISOString().split("T")[0],
+                })
+                .eq("id", req.params.id)
+                .select();
+            if (error) throw error;
+            res.json({ order: data[0] });
+        } catch (err) {
+            res.status(500).json({ message: "Mark delivered failed", details: err.message });
+        }
+    }
+);
+
+// ============ CANCEL ORDER ============
+router.put(
+    "/admin/orders/:id/cancel",
+    verifyToken,
+    requireAdmin,
+    async (req, res) => {
+        try {
+            const { data, error } = await supabase
+                .from("orders")
+                .update({
+                    delivery_status: "Cancelled",
+                })
+                .eq("id", req.params.id)
+                .select();
+            if (error) throw error;
+            res.json({ order: data[0] });
+        } catch (err) {
+            res.status(500).json({ message: "Cancel order failed", details: err.message });
+        }
+    }
+);
+
 // ============ GET USER SALES COUNT ============
 router.get("/user/sales/count", verifyToken, async (req, res) => {
     try {

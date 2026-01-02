@@ -75,7 +75,9 @@ create table public.orders (
         array[
           'Pending'::text,
           'Confirmed'::text,
-          'EMI Pending'::text
+          'EMI Pending'::text,
+          'Delivered'::text,
+          'Cancelled'::text
         ]
       )
     )

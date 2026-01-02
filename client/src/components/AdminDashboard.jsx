@@ -174,6 +174,9 @@ const DashboardContent = () => {
         </div>
 
         <nav className={styles.sidebarNav}>
+          <button className={`${styles.navLink} ${styles.homeNavLink || ''}`} onClick={() => { navigate('/admin'); setIsSidebarOpen(false); }}>
+            <FiHome size={20} /> <span>Home</span>
+          </button>
           <NavItem id="insights" icon={FiActivity} label="Insights" />
           <NavItem id="products" icon={MdInventory2} label="Inventory" />
           <NavItem id="orders" icon={FiShoppingBag} label="Orders" />
@@ -183,11 +186,7 @@ const DashboardContent = () => {
           <NavItem id="config" icon={FiSettings} label="Config" />
         </nav>
 
-        <div className={styles.sidebarFooter}>
-          <button className={styles.adminPanelBtn} onClick={() => navigate("/admin")}>
-            <FiHome size={18} /> <span>Admin Panel</span>
-          </button>
-        </div>
+        {/* footer removed to avoid hidden button on small screens */}
       </aside>
 
       {/* MAIN CONTENT */}
@@ -260,7 +259,7 @@ const DashboardContent = () => {
                   {latestUserMessage.userId ? (
                     <>
                       <div className={styles.messageHeader}>
-                        <strong>User ID:</strong> <span className={styles.userId}>{latestUserMessage.userId}</span>
+                        <strong>User Name:</strong> <span className={styles.userId}>{latestUserMessage.userName ? latestUserMessage.userName : `User #${latestUserMessage.userId}`}</span>
                       </div>
                       <div className={styles.messageContent}>
                         <p>{latestUserMessage.content || 'Loading...'}</p>
@@ -367,6 +366,8 @@ const DashboardContent = () => {
                       key={order.id}
                       order={order}
                       confirmDelivery={confirmNetpayDelivery}
+                      markDelivered={(id) => markOrderDelivered(id)}
+                      cancelOrder={(id) => cancelOrder(id)}
                     />
                   ))}
                 </div>
@@ -676,8 +677,9 @@ const ProductCard = ({ item, index, type, onDelete, onChange, isEditing, onEdit 
 };
 
 // ===== ORDER CARD COMPONENT =====
-const OrderCard = ({ order, confirmDelivery }) => {
-  const isDelivered = order.deliveryStatus === "delivered";
+const OrderCard = ({ order, confirmDelivery, markDelivered, cancelOrder }) => {
+  const isDelivered = (order.deliveryStatus || order.delivery_status || '').toLowerCase() === "delivered";
+  const isCancelled = (order.deliveryStatus || order.delivery_status || '').toLowerCase() === "cancelled";
   return (
     <div className={`${styles.orderCard} ${isDelivered ? styles.orderDelivered : ''}`}>
       <div className={styles.orderCardGrid}>
@@ -713,12 +715,19 @@ const OrderCard = ({ order, confirmDelivery }) => {
         )}
       </div>
       <div className={styles.orderStatus}>
-        {isDelivered ? (
+        {isCancelled ? (
+          <span className={styles.statusBadgeCancelled}>✕ Cancelled</span>
+        ) : isDelivered ? (
           <span className={styles.statusBadgeDelivered}>✓ Delivered</span>
         ) : (
-          <button className={styles.confirmBtn} onClick={() => confirmDelivery(order.id)}>
-            Mark as Delivered
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className={styles.confirmBtn} onClick={() => markDelivered(order.id)}>
+              Mark as Delivered
+            </button>
+            <button className={styles.cancelBtn} onClick={() => cancelOrder(order.id)}>
+              Cancel Order
+            </button>
+          </div>
         )}
       </div>
     </div>

@@ -480,7 +480,7 @@ h2 {
         flex-direction: column;
         gap: 6px;
         padding: 6px !important;
-        margin-left: -18px !important;
+        margin-left: -8px !important;
         background: rgba(209, 192, 255, 0.178);
         border: 1px dashed #767ff8;
     }

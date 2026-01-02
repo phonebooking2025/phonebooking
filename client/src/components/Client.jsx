@@ -977,10 +977,11 @@ const Client = () => {
                 const preview = getEmiPreview();
                 return (
                   <div>
-                    <p><strong>Down Payment:</strong> ₹{Number(preview.dp || 0).toFixed(2)}</p>
-                    <p><strong>Remaining:</strong> ₹{Number(preview.remaining || 0).toFixed(2)}</p>
-                    <p><strong>Estimated Monthly EMI:</strong> ₹{Number(preview.monthly || 0).toFixed(2)}{preview.months ? ` • ${preview.months} months` : ''}</p>
+                    <p><strong>Down Payment:</strong> ₹{Number(preview.dp || 0).toLocaleString('en-IN')}</p>
+                    <p><strong>Remaining:</strong> ₹{Number(preview.remaining || 0).toLocaleString('en-IN')}</p>
+                    <p><strong>Monthly EMI:</strong> ₹{Number(preview.monthly || 0).toLocaleString('en-IN')}{preview.months ? ` • ${preview.months} months` : ''}</p>
                   </div>
+
                 )
               })()}
             </div>

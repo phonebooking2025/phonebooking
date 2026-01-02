@@ -31,7 +31,7 @@ export const AdminDataProvider = ({ children }) => {
     const [preciousItems, setPreciousItems] = useState([]);
     const [otherItems, setOtherItems] = useState([]);
     const [netpaySales, setNetpaySales] = useState([]);
-    const [latestUserMessage, setLatestUserMessage] = useState({ content: 'Loading...', userId: null });
+    const [latestUserMessage, setLatestUserMessage] = useState({ content: 'Loading...', userId: null, userName: null });
     const [adminReplyContent, setAdminReplyContent] = useState('');
     const [settings, setSettings] = useState({
         id: null,
@@ -185,12 +185,16 @@ export const AdminDataProvider = ({ children }) => {
                 const latestMessage = latestMessagesArray.reduce((prev, current) =>
                     new Date(prev.created_at) > new Date(current.created_at) ? prev : current
                 );
+                const usersList = usersRes.data?.users || [];
+                const matchedUser = usersList.find(u => String(u.id) === String(latestMessage?.user_id));
+                const userName = matchedUser?.name || matchedUser?.username || matchedUser?.user_name || null;
                 setLatestUserMessage({
                     content: latestMessage?.content || 'No messages from users.',
-                    userId: latestMessage?.user_id || null
+                    userId: latestMessage?.user_id || null,
+                    userName: userName
                 });
             } else {
-                setLatestUserMessage({ content: 'No messages found.', userId: null });
+                setLatestUserMessage({ content: 'No messages found.', userId: null, userName: null });
             }
 
             // users list
@@ -356,6 +360,40 @@ export const AdminDataProvider = ({ children }) => {
         }
     };
 
+    const markOrderDelivered = async (orderId) => {
+        if (!orderId) return;
+        setLoading(true);
+        try {
+            await axiosInstance.put(`/admin/orders/${orderId}/deliver`);
+            await fetchAdminData();
+            toast.success('Order marked as delivered');
+        } catch (err) {
+            console.error('Mark delivered error:', err);
+            toast.error(err.response?.data?.message || 'Failed to mark delivered');
+            setError(err.response?.data?.message || err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const cancelOrder = async (orderId) => {
+        if (!orderId) return;
+        const ok = window.confirm('Are you sure you want to cancel this order?');
+        if (!ok) return;
+        setLoading(true);
+        try {
+            await axiosInstance.put(`/admin/orders/${orderId}/cancel`);
+            await fetchAdminData();
+            toast.success('Order cancelled');
+        } catch (err) {
+            console.error('Cancel order error:', err);
+            toast.error(err.response?.data?.message || 'Failed to cancel order');
+            setError(err.response?.data?.message || err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const sendSmsToUser = async () => {
         const targetUserId = latestUserMessage.userId;
         if (!adminReplyContent.trim()) return console.error('Reply empty.');
@@ -479,6 +517,8 @@ export const AdminDataProvider = ({ children }) => {
         deleteBanner,
         updateWhatsAppNumber,
         confirmNetpayDelivery,
+        markOrderDelivered,
+        cancelOrder,
         sendSmsToUser,
         saveAllChanges,
         fetchAdminData,
