@@ -48,6 +48,7 @@ export const AdminDataProvider = ({ children }) => {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [users, setUsers] = useState([]);
 
     // ------------------ Mappers ------------------
     const mapProductFromDb = (p) => ({
@@ -162,12 +163,13 @@ export const AdminDataProvider = ({ children }) => {
         }
         setLoading(true);
         try {
-            const [preciousRes, otherRes, salesRes, messagesRes, settingsRes] = await Promise.all([
+            const [preciousRes, otherRes, salesRes, messagesRes, settingsRes, usersRes] = await Promise.all([
                 axiosInstance.get('/products/precious'),
                 axiosInstance.get('/products/other'),
                 axiosInstance.get('/admin/orders'),
                 axiosInstance.get('/admin/messages/latest-per-user'),
                 axiosInstance.get('/settings'),
+                axiosInstance.get('/admin/users'),
             ]);
 
             setPreciousItems((preciousRes.data || []).map(mapProductFromDb));
@@ -191,6 +193,9 @@ export const AdminDataProvider = ({ children }) => {
                 setLatestUserMessage({ content: 'No messages found.', userId: null });
             }
 
+            // users list
+            setUsers(usersRes.data?.users || []);
+
             setError(null);
         } catch (err) {
             console.error('Admin fetch error:', err);
@@ -200,6 +205,35 @@ export const AdminDataProvider = ({ children }) => {
             setLoading(false);
         }
     }, [isAuthenticated, user, logout, fetchPublicData]);
+
+    // ------------------ USERS ------------------
+    const fetchUsers = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await axiosInstance.get('/admin/users');
+            setUsers(res.data?.users || []);
+        } catch (err) {
+            console.error('Fetch users error:', err);
+            setError(err.response?.data?.message || err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const deleteUser = async (id) => {
+        if (!id) return;
+        setLoading(true);
+        try {
+            await axiosInstance.delete(`/admin/users/${id}`);
+            setUsers(prev => prev.filter(u => u.id !== id));
+            toast.success('User deleted');
+        } catch (err) {
+            console.error('Delete user error:', err);
+            toast.error(err.response?.data?.message || 'Failed to delete user');
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     const handleAdVideoFileChange = (file) => {
@@ -432,10 +466,13 @@ export const AdminDataProvider = ({ children }) => {
         settings,
         loading,
         error,
+        users,
         setAdminReplyContent,
         handleProductChange,
         addMoreProduct,
         deleteProduct,
+        fetchUsers,
+        deleteUser,
         handleSettingsChange,
         handleBannerFileChange,
         addBannerInput,

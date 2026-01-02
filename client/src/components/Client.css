@@ -431,7 +431,7 @@ h2 {
 @media (max-width: 480px) {
     .product-sections-container {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 14px;
     }
 
     .products-grid {
@@ -476,6 +476,7 @@ h2 {
 
     .product-card {
         width: 100% !important;
+        padding: 0 8px !important;
         height: 300px !important;
     }
 
@@ -491,9 +492,9 @@ h2 {
     .product-sections-container {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px !important;
+        gap: 16px !important;
         margin-top: 30px;
-        margin-left: -10px;
+        margin-left: -12px;
     }
 
     .product-content h3 {
@@ -512,7 +513,7 @@ h2 {
     }
 
     .items-section {
-        margin-left: 10px;
+        margin-left: 14px;
     }
 }
 

@@ -268,4 +268,56 @@ router.get(
     }
 );
 
+// ============ GET USERS LIST ============
+router.get(
+    "/users",
+    verifyToken,
+    requireAdmin,
+    async (req, res) => {
+        try {
+            const { data, error } = await supabase
+                .from("users")
+                .select("id, name, phone, is_admin, created_at")
+                .order("created_at", { ascending: false });
+
+            if (error) throw error;
+
+            res.json({ users: data });
+        } catch (err) {
+            res.status(500).json({ message: "Failed to fetch users", details: err.message });
+        }
+    }
+);
+
+// ============ DELETE USER ============
+router.delete(
+    "/users/:id",
+    verifyToken,
+    requireAdmin,
+    async (req, res) => {
+        try {
+            const userId = req.params.id;
+
+            const { data: existingUser, error: fetchError } = await supabase
+                .from("users")
+                .select("id, is_admin")
+                .eq("id", userId)
+                .maybeSingle();
+
+            if (fetchError) throw fetchError;
+
+            if (!existingUser) return res.status(404).json({ message: "User not found" });
+
+            if (existingUser.is_admin) return res.status(403).json({ message: "Cannot delete an admin user" });
+
+            const { error } = await supabase.from("users").delete().eq("id", userId);
+            if (error) throw error;
+
+            res.json({ message: "User deleted successfully" });
+        } catch (err) {
+            res.status(500).json({ message: "Delete user failed", details: err.message });
+        }
+    }
+);
+
 export default router;

@@ -64,6 +64,7 @@ const DashboardContent = () => {
     handleSettingsChange, handleBannerFileChange, addBannerInput, deleteBanner,
     confirmNetpayDelivery, sendSmsToUser, saveAllChanges
   } = useAdminData() || {};
+  const { users = [], fetchUsers = () => { }, deleteUser = () => { } } = useAdminData() || {};
 
   const saveTimeoutRef = useRef(null);
   const sidebarRef = useRef(null);
@@ -136,6 +137,10 @@ const DashboardContent = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'users') fetchUsers();
+  }, [activeTab, fetchUsers]);
+
   if (loading) return <Loader message="Loading Admin Panel..." />;
 
   const NavItem = ({ id, icon: Icon, label }) => (
@@ -171,6 +176,7 @@ const DashboardContent = () => {
           <NavItem id="insights" icon={FiActivity} label="Insights" />
           <NavItem id="products" icon={MdInventory2} label="Inventory" />
           <NavItem id="orders" icon={FiShoppingBag} label="Orders" />
+          <NavItem id="users" icon={FiUsers} label="Users" />
           <NavItem id="payments" icon={FiCreditCard} label="Payments" />
           <NavItem id="config" icon={FiSettings} label="Config" />
         </nav>
@@ -178,9 +184,6 @@ const DashboardContent = () => {
         <div className={styles.sidebarFooter}>
           <button className={styles.adminPanelBtn} onClick={() => navigate("/admin")}>
             <FiHome size={18} /> <span>Admin Panel</span>
-          </button>
-          <button className={styles.logoutBtn} onClick={logout}>
-            <FiLogOut size={18} /> <span>Sign Out</span>
           </button>
         </div>
       </aside>
@@ -215,6 +218,12 @@ const DashboardContent = () => {
                   color="revenue"
                 />
                 <AnalyticsCard
+                  title="Total Orders"
+                  value={totalOrders}
+                  icon={<FiShoppingBag />}
+                  color="orders"
+                />
+                <AnalyticsCard
                   title="Other Items"
                   value={totalOtherItems}
                   icon={<MdInventory2 />}
@@ -225,12 +234,6 @@ const DashboardContent = () => {
                   value={totalMobileItems}
                   icon={<FiPhone />}
                   color="mobile"
-                />
-                <AnalyticsCard
-                  title="Total Orders"
-                  value={totalOrders}
-                  icon={<FiShoppingBag />}
-                  color="orders"
                 />
                 <AnalyticsCard
                   title="Total Users"
@@ -363,6 +366,33 @@ const DashboardContent = () => {
                       order={order}
                       confirmDelivery={confirmNetpayDelivery}
                     />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ===== USERS TAB ===== */}
+          {activeTab === "users" && (
+            <div className={styles.usersView}>
+              <div className={styles.sectionHeader}>
+                <h2>👥 Users</h2>
+                <span className={styles.userCount}>Total: {users.length}</span>
+              </div>
+              {users.length === 0 ? (
+                <div className={styles.emptyState}><p>No users found</p></div>
+              ) : (
+                <div className={styles.usersList}>
+                  {users.map(u => (
+                    <div key={u.id} className={styles.userRow}>
+                      <div className={styles.userName}>{u.name || '—'}</div>
+                      <div className={styles.userPhone}>{u.phone || '—'}</div>
+                      <div className={styles.userActions}>
+                        <button className={styles.deleteBtn} onClick={() => deleteUser(u.id)} title="Delete user">
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
