@@ -401,6 +401,9 @@ const Client = () => {
     const product = allProducts.find(p => p.id === productId);
     if (product) {
       setCurrentBookingModel(product);
+      // initialize EMI form values from product (admin-controlled)
+      setEmiDownPaymentInput(product.downPaymentAmount || '');
+      setEmiSelectedMonths('');
       showPage('emi-details-page');
     }
   };
@@ -410,8 +413,7 @@ const Client = () => {
       toast.error('Please fill all the required fields (Name, Mobile, Address).');
       return;
     }
-    const emiMonthsList = (emiSelectedMonths || currentBookingModel?.emiMonths || '').split(',').map(s => s.trim()).filter(Boolean);
-    const months = emiMonthsList.length > 0 ? emiMonthsList[0] : '';
+    const months = parseInt((emiSelectedMonths || '').toString().split(',')[0], 10) || parseInt((currentBookingModel?.emiMonths || '').toString().split(',')[0], 10) || 0;
     setPendingEmi({
       product_id: currentBookingModel.id,
       name: netpayForm.name,
@@ -422,7 +424,7 @@ const Client = () => {
       model: currentBookingModel.model,
       amount: currentBookingModel.netpayPrice,
       emiMonths: emiSelectedMonths || currentBookingModel?.emiMonths || '',
-      downPayment: emiDownPaymentInput || currentBookingModel?.downPaymentAmount || 0,
+      downPayment: Number(emiDownPaymentInput || currentBookingModel?.downPaymentAmount || 0),
       timestamp: new Date().toISOString(),
     });
     showPage('emi-qr-page');
@@ -475,6 +477,28 @@ const Client = () => {
     } finally {
       setConfirmingEmi(false)
     }
+  };
+
+  // EMI calculations helper
+  const computeEmiValues = () => {
+    const total = Number(currentBookingModel?.netpayPrice || 0);
+    const dp = Number(emiDownPaymentInput || currentBookingModel?.downPaymentAmount || 0);
+    const months = parseInt((emiSelectedMonths || '').toString().split(',')[0], 10) || parseInt((currentBookingModel?.emiMonths || '').toString().split(',')[0], 10) || 0;
+    const remaining = Math.max(0, total - dp);
+    const monthly = months > 0 ? (remaining / months) : 0;
+    return { total, dp, months, remaining, monthly };
+  };
+
+  const getEmiPreview = () => {
+    if (pendingEmi) {
+      const total = Number(pendingEmi.amount || 0);
+      const dp = Number(pendingEmi.downPayment || 0);
+      const months = parseInt((pendingEmi.emiMonths || '').toString().split(',')[0], 10) || 0;
+      const remaining = Math.max(0, total - dp);
+      const monthly = months > 0 ? (remaining / months) : 0;
+      return { total, dp, months, remaining, monthly };
+    }
+    return computeEmiValues();
   };
 
   const submitNetpayForm = () => {
@@ -667,7 +691,7 @@ const Client = () => {
       <Toaster position="top-center" />
 
       {/* HEADER */}
-      <div 
+      <div
         className="header"
         style={{ backgroundColor: settings.headerBgColor || '#1D4ED8' }}
       >
@@ -814,7 +838,7 @@ const Client = () => {
               <img src={currentBookingModel.image} alt="Product Image" className="netpay-product-image" />
               <h4>Item Full Details:</h4>
               <p className="item-specs">{currentBookingModel.fullSpecs || 'No details available.'}</p>
-              <h3 className="netpay-price">Netpay Price: <span style={{fontWeight:"600"}}>₹{currentBookingModel.netpayPrice}</span> </h3>
+              <h3 className="netpay-price">Netpay Price: <span style={{ fontWeight: "600" }}>₹{currentBookingModel.netpayPrice}</span> </h3>
               {currentBookingModel.buyOneGetOne === 'Yes' && (
                 <div className="b1g1-detail-box">
                   <h4 style={{ color: '#E91E63' }}>BUY 1 GET 1 FREE</h4>
@@ -902,7 +926,19 @@ const Client = () => {
               </div>
               <div className="form-group">
                 <label>Down Payment Amount (INR):</label>
-                <input type="number" value={emiDownPaymentInput} onChange={(e) => setEmiDownPaymentInput(e.target.value)} placeholder={currentBookingModel.downPaymentAmount || '0'} />
+                {currentBookingModel?.downPaymentAmount ? (
+                  <p className="form-display-value">₹{Number(currentBookingModel.downPaymentAmount).toFixed(2)}</p>
+                ) : (
+                  <input type="number" value={emiDownPaymentInput} onChange={(e) => setEmiDownPaymentInput(e.target.value)} placeholder={currentBookingModel.downPaymentAmount || '0'} />
+                )}
+              </div>
+              <div className="form-group">
+                <label>Remaining Amount (INR):</label>
+                <p className="form-display-value">₹{computeEmiValues().remaining.toFixed(2)}</p>
+              </div>
+              <div className="form-group">
+                <label>Estimated Monthly EMI (INR):</label>
+                <p className="form-display-value">₹{computeEmiValues().monthly.toFixed(2)}{computeEmiValues().months ? ` • ${computeEmiValues().months} months` : ''}</p>
               </div>
               <div className="form-group">
                 <label>Customer Name:</label>
@@ -936,6 +972,18 @@ const Client = () => {
           <div id="emi-qr-page" className={`page ${activePage === 'emi-qr-page' ? 'active' : ''}`}>
             <button onClick={() => showPage('emi-details-page')} className="btn-back">← Back</button>
             <h2>Scan to Pay (INR {currentBookingModel.netpayPrice})</h2>
+            <div className="emi-breakdown" style={{ textAlign: 'left', margin: '12px 0' }}>
+              {(() => {
+                const preview = getEmiPreview();
+                return (
+                  <div>
+                    <p><strong>Down Payment:</strong> ₹{Number(preview.dp || 0).toFixed(2)}</p>
+                    <p><strong>Remaining:</strong> ₹{Number(preview.remaining || 0).toFixed(2)}</p>
+                    <p><strong>Estimated Monthly EMI:</strong> ₹{Number(preview.monthly || 0).toFixed(2)}{preview.months ? ` • ${preview.months} months` : ''}</p>
+                  </div>
+                )
+              })()}
+            </div>
             <img src={currentBookingModel.netpayQrCode} alt="QR Code" className="qr-code-image" />
             <p className="qr-instruction">Please complete the payment and upload a screenshot of your payment confirmation below.</p>
             <div className="form-group">
