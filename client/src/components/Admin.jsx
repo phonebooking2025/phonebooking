@@ -378,6 +378,68 @@ const AdminContent = () => {
                             </div>
                         </div>
 
+                        {/* Header Background Image + Opacity */}
+                        <div className="form-group">
+                            <label htmlFor="header-background-upload">Header Background Image:</label>
+                            {(settings.headerBgImage || settings.headerBgImageFile) && (
+                                <img
+                                    src={renderFilePreview(
+                                        settings.headerBgImageFile,
+                                        settings.headerBgImage
+                                    )}
+                                    alt="Header Background Preview"
+                                    style={{
+                                        maxWidth: '100%',
+                                        width: '100%',
+                                        display: 'block',
+                                        marginBottom: '10px',
+                                        borderRadius: '8px',
+                                        boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+                                        objectFit: 'cover',
+                                        // apply live opacity from 0..100 value
+                                        opacity: ((settings.headerImageOpacity ?? 100) / 100),
+                                        transition: 'opacity 180ms linear'
+                                    }}
+                                />
+                            )}
+                            <input
+                                type="file"
+                                id="header-background-upload"
+                                accept="image/*"
+                                onChange={(e) => handleSettingsChange('headerBgImageFile', e.target.files[0])}
+                            />
+
+                            <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <label style={{ margin: 0 }}>Image Opacity:</label>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    value={settings.headerImageOpacity ?? 100}
+                                    onChange={(e) => handleSettingsChange('headerImageOpacity', Number(e.target.value))}
+                                    style={{ flex: 1 }}
+                                />
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    value={settings.headerImageOpacity ?? 100}
+                                    onChange={(e) => {
+                                        let v = Number(e.target.value);
+                                        if (Number.isNaN(v)) v = 0;
+                                        if (v < 0) v = 0;
+                                        if (v > 100) v = 100;
+                                        handleSettingsChange('headerImageOpacity', v);
+                                    }}
+                                    style={{ width: '60px', textAlign: 'right' }}
+                                />
+                                <div style={{ minWidth: '10px' }}></div>
+                                <button type="button" className="btn-save-whatsapp" onClick={saveAllChanges}>Save</button>
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Banner Section */}

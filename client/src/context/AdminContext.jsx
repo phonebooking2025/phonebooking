@@ -39,6 +39,9 @@ export const AdminDataProvider = ({ children }) => {
         whatsappNumber: '',
         companyLogo: '',
         deliveryImage: '',
+        headerBgImage: '',
+        headerBgImageFile: null,
+        headerImageOpacity: 1,
         banners: [],
         advertisementVideoUrl: '',
         advertisementVideoFile: null,
@@ -107,6 +110,8 @@ export const AdminDataProvider = ({ children }) => {
         headerBgColor: s.header_bg_color || '#1D4ED8',
         companyLogo: s.company_logo_url || '',
         deliveryImage: s.delivery_image_url || '',
+        headerBgImage: s.header_background_image_url || '',
+        headerImageOpacity: typeof s.header_image_opacity !== 'undefined' ? Math.round(Number(s.header_image_opacity) * 100) : 100,
         banners: (s.banners || []).map(url => ({ path: url, newFile: null })),
         advertisementVideoUrl: s.advertisement_video_url || '',
         advertisementVideoFile: null,
@@ -419,8 +424,16 @@ export const AdminDataProvider = ({ children }) => {
             settingsFormData.append('header_title', settings.headerTitle || '');
             settingsFormData.append('whatsapp_number', settings.whatsappNumber || '');
             settingsFormData.append('header_bg_color', settings.headerBgColor || '#1D4ED8');
+            // send opacity as 0..1 numeric to server (convert from 0..100 UI value)
+            const normalizedOpacity = typeof settings.headerImageOpacity !== 'undefined' && settings.headerImageOpacity !== null
+                ? Number(settings.headerImageOpacity) / 100
+                : 1;
+            settingsFormData.append('header_image_opacity', normalizedOpacity);
+            // send current header background image url if exists (server will keep if no new file uploaded)
+            settingsFormData.append('header_background_image_url', settings.headerBgImage || '');
             if (settings.companyLogoFile) settingsFormData.append('companyLogoFile', settings.companyLogoFile);
             if (settings.deliveryImageFile) settingsFormData.append('deliveryImageFile', settings.deliveryImageFile);
+            if (settings.headerBgImageFile) settingsFormData.append('headerBackgroundFile', settings.headerBgImageFile);
             if (settings.advertisementVideoFile) { settingsFormData.append('advertisementVideoFile', settings.advertisementVideoFile); }
 
             const bannerPaths = [];

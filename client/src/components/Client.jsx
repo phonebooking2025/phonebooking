@@ -703,8 +703,29 @@ const Client = () => {
       {/* HEADER */}
       <div
         className="header"
-        style={{ backgroundColor: settings.headerBgColor || '#1D4ED8' }}
+        style={{ backgroundColor: settings.headerBgColor || '#1D4ED8', position: 'relative', overflow: 'hidden' }}
       >
+        {settings.headerBgImage && (
+          (() => {
+            const bgOpacity = (Number(settings.headerImageOpacity ?? 100) || 100) / 100;
+            return (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${settings.headerBgImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: bgOpacity,
+                  transition: 'opacity 300ms ease',
+                  zIndex: 0
+                }}
+              />
+            );
+          })()
+        )}
+
         <img
           src={settings.companyLogo || "https://placehold.co/100x50/4F46E5/ffffff?text=Company+Logo"}
           alt="Company Logo"

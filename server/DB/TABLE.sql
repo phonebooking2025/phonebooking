@@ -116,6 +116,8 @@ create table public.settings (
   header_title text null,
   company_logo_url text null,
   delivery_image_url text null,
+  header_background_image_url text null,
+  header_image_opacity numeric(4,2) null default 1,
   banners jsonb null,
   updated_at timestamp with time zone null default now(),
   advertisement_video_url text null,

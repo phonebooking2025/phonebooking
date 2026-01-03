@@ -82,17 +82,22 @@ router.post(
         { name: "companyLogoFile", maxCount: 1 },
         { name: "deliveryImageFile", maxCount: 1 },
         { name: "bannerFiles", maxCount: 20 },
+        { name: "headerBackgroundFile", maxCount: 1 },
         { name: "advertisementVideoFile", maxCount: 1 },
     ]),
     async (req, res) => {
         try {
             const companyLogoFile = req.files?.companyLogoFile?.[0];
             const deliveryImageFile = req.files?.deliveryImageFile?.[0];
+            const headerBackgroundFile = req.files?.headerBackgroundFile?.[0];
             const bannerFiles = req.files?.bannerFiles || [];
             const advertisementVideoFile = req.files?.advertisementVideoFile?.[0];
 
             let { header_title, company_logo_url, delivery_image_url, banners, whatsapp_number, header_bg_color } =
                 req.body;
+
+            const header_image_opacity = typeof req.body.header_image_opacity !== 'undefined' ? Number(req.body.header_image_opacity) : undefined;
+            const header_background_image_url_from_client = req.body.header_background_image_url || null;
 
             const { data: existingSettings } = await supabase
                 .from("settings")
@@ -109,6 +114,14 @@ router.post(
                     "settings/delivery"
                 )
                 : existingSettings?.delivery_image_url || delivery_image_url || null;
+
+            let header_background_image_url = existingSettings?.header_background_image_url || null;
+            if (headerBackgroundFile) {
+                header_background_image_url = await uploadToCloudinary(headerBackgroundFile.buffer, "settings/header");
+            } else if (header_background_image_url_from_client) {
+                // client explicitly sent current url to keep
+                header_background_image_url = header_background_image_url_from_client || header_background_image_url;
+            }
 
             let advertisement_video_url = advertisementVideoFile
                 ? await uploadToCloudinary(
@@ -145,6 +158,8 @@ router.post(
                 header_title: header_title || existingSettings?.header_title || null,
                 company_logo_url,
                 delivery_image_url,
+                header_background_image_url,
+                header_image_opacity: typeof header_image_opacity !== 'undefined' ? header_image_opacity : (existingSettings?.header_image_opacity || 1),
                 banners: bannerArray,
                 advertisement_video_url,
                 whatsapp_number: whatsapp_number || existingSettings?.whatsapp_number || null,
