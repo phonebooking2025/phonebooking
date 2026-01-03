@@ -703,36 +703,43 @@ const Client = () => {
       {/* HEADER */}
       <div
         className="header"
-        style={{ backgroundColor: settings.headerBgColor || '#1D4ED8', position: 'relative', overflow: 'hidden' }}
+        style={{
+          backgroundColor: settings.headerBgColor || '#1D4ED8',
+          position: 'relative',
+          overflow: 'hidden',
+          backgroundImage: settings.headerBgImage ? `url(${settings.headerBgImage})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed'
+        }}
       >
+        {/* Color Overlay */}
         {settings.headerBgImage && (
-          (() => {
-            const bgOpacity = (Number(settings.headerImageOpacity ?? 100) || 100) / 100;
-            return (
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${settings.headerBgImage})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: bgOpacity,
-                  transition: 'opacity 300ms ease',
-                  zIndex: 0
-                }}
-              />
-            );
-          })()
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: settings.headerBgColor || '#1D4ED8',
+              opacity: 1 - ((Number(settings.headerImageOpacity ?? 100) || 100) / 100),
+              transition: 'opacity 300ms ease',
+              zIndex: 1
+            }}
+          />
         )}
 
-        <img
-          src={settings.companyLogo || "https://placehold.co/100x50/4F46E5/ffffff?text=Company+Logo"}
-          alt="Company Logo"
-          className="header-image"
-        />
-        <h1>{settings.headerTitle || 'Booking Now'}</h1>
-        <div className="date-time">{currentDateTime}</div>
+        {/* Content Container */}
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+          <img
+            src={settings.companyLogo || "https://placehold.co/100x50/4F46E5/ffffff?text=Company+Logo"}
+            alt="Company Logo"
+            className="header-image"
+          />
+          <h1>{settings.headerTitle || 'Booking Now'}</h1>
+          <div className="date-time">{currentDateTime}</div>
+        </div>
+
+        {/* Login Status - Position fixed relative to header */}
         <div className="login-status-container">
           {isLoggedIn ? (
             <button onClick={handleLogout} className="login-button">Logout ({loggedInUser.username})</button>
