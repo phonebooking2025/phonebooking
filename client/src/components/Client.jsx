@@ -710,18 +710,6 @@ const Client = () => {
           minHeight: '200px'
         }}
       >
-        {/* Debug logging - check if image URL is being received */}
-        {(() => {
-          if (settings.headerBgImage && settings.headerBgImage.trim()) {
-            console.log('✅ Image URL received:', settings.headerBgImage);
-            console.log('✅ Opacity value:', settings.headerImageOpacity);
-            console.log('✅ Calculated opacity (0-1):', (settings.headerImageOpacity || 100) / 100);
-          } else {
-            console.log('⚠️ No image URL or empty string');
-          }
-          return null;
-        })()}
-
         {/* Background Image Layer - Only show if image exists and is not empty */}
         {settings.headerBgImage && settings.headerBgImage.trim() && (
           <img
@@ -730,12 +718,10 @@ const Client = () => {
             crossOrigin="anonymous"
             onLoad={() => {
               console.log('✅ Header background image loaded successfully');
-              console.log('✅ Image URL:', settings.headerBgImage);
             }}
             onError={(e) => {
               console.error('❌ Header background image failed to load');
               console.error('   URL:', settings.headerBgImage);
-              console.error('   Error:', e);
             }}
             style={{
               position: 'absolute',

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 
 const ClientContext = createContext();
@@ -51,6 +51,9 @@ export const ClientDataProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Track if we've already fetched to prevent infinite loops
+  const hasInitialFetched = useRef(false);
+
   // --- MAPPERS ---
   const mapProductFromDb = (p) => ({
     id: p.id,
@@ -79,8 +82,8 @@ export const ClientDataProvider = ({ children }) => {
     headerBgColor: s.header_bg_color || '#1D4ED8',
     headerBgImage: s.header_background_image_url || '',
     // Convert opacity from decimal (0-1) to percentage (0-100) for Client component
-    headerImageOpacity: typeof s.header_image_opacity !== 'undefined' && s.header_image_opacity !== null 
-      ? Math.round(Number(s.header_image_opacity) * 100) 
+    headerImageOpacity: typeof s.header_image_opacity !== 'undefined' && s.header_image_opacity !== null
+      ? Math.round(Number(s.header_image_opacity) * 100)
       : 100,
     companyLogo: s.company_logo_url || '',
     deliveryImage: s.delivery_image_url || '',
@@ -106,16 +109,7 @@ export const ClientDataProvider = ({ children }) => {
       setPreciousItems((preciousRes.data || []).map(mapProductFromDb));
       setOtherItems((otherRes.data || []).map(mapProductFromDb));
 
-      // Debug: Log raw settings from API
-      console.log('Raw settings from API:', settingsRes.data);
-
       const fetchedSettings = mapSettingsFromDb(settingsRes.data || {});
-
-      // Debug: Log mapped settings
-      console.log('Mapped settings:', fetchedSettings);
-      console.log('Header BG Image:', fetchedSettings.headerBgImage);
-      console.log('Header Image Opacity:', fetchedSettings.headerImageOpacity);
-
       setSettings(fetchedSettings);
       try { localStorage.setItem('website_settings', JSON.stringify(fetchedSettings)); } catch (e) { }
       setNetpaySalesCount(countRes.data?.total_sales_count || 0);
@@ -140,9 +134,13 @@ export const ClientDataProvider = ({ children }) => {
     }
   }, []);
 
+  // Fetch data only once on component mount
   useEffect(() => {
-    fetchPublicData();
-  }, [fetchPublicData]);
+    if (!hasInitialFetched.current) {
+      hasInitialFetched.current = true;
+      fetchPublicData();
+    }
+  }, []);
 
   const contextValue = {
     preciousItems,
