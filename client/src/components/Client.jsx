@@ -704,22 +704,63 @@ const Client = () => {
       <div
         className="header"
         style={{
-          backgroundColor: settings.headerBgColor || '#1D4ED8',
           position: 'relative',
           overflow: 'hidden',
-          backgroundImage: settings.headerBgImage ? `url(${settings.headerBgImage})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
+          backgroundColor: settings.headerBgColor || '#1D4ED8',
+          minHeight: '200px'
         }}
       >
-        {/* Color Overlay */}
+        {/* Debug logging - check if image URL is being received */}
+        {(() => {
+          if (settings.headerBgImage && settings.headerBgImage.trim()) {
+            console.log('✅ Image URL received:', settings.headerBgImage);
+            console.log('✅ Opacity value:', settings.headerImageOpacity);
+            console.log('✅ Calculated opacity (0-1):', (settings.headerImageOpacity || 100) / 100);
+          } else {
+            console.log('⚠️ No image URL or empty string');
+          }
+          return null;
+        })()}
+
+        {/* Background Image Layer - Only show if image exists and is not empty */}
+        {settings.headerBgImage && settings.headerBgImage.trim() && (
+          <img
+            src={settings.headerBgImage}
+            alt="Header Background"
+            crossOrigin="anonymous"
+            onLoad={() => {
+              console.log('✅ Header background image loaded successfully');
+              console.log('✅ Image URL:', settings.headerBgImage);
+            }}
+            onError={(e) => {
+              console.error('❌ Header background image failed to load');
+              console.error('   URL:', settings.headerBgImage);
+              console.error('   Error:', e);
+            }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
+              opacity: (Number(settings.headerImageOpacity ?? 100) || 100) / 100,
+              transition: 'opacity 300ms ease',
+              zIndex: 0
+            }}
+          />
+        )}
+
+        {/* Color Overlay Layer - shows when image opacity is less than 100 */}
         {settings.headerBgImage && (
           <div
             style={{
               position: 'absolute',
-              inset: 0,
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
               backgroundColor: settings.headerBgColor || '#1D4ED8',
               opacity: 1 - ((Number(settings.headerImageOpacity ?? 100) || 100) / 100),
               transition: 'opacity 300ms ease',
@@ -728,8 +769,18 @@ const Client = () => {
           />
         )}
 
-        {/* Content Container */}
-        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+        {/* Content Container - Above all layers */}
+        <div style={{
+          position: 'relative',
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          padding: '25px 20px',
+          minHeight: '200px',
+          justifyContent: 'center'
+        }}>
           <img
             src={settings.companyLogo || "https://placehold.co/100x50/4F46E5/ffffff?text=Company+Logo"}
             alt="Company Logo"
@@ -739,8 +790,8 @@ const Client = () => {
           <div className="date-time">{currentDateTime}</div>
         </div>
 
-        {/* Login Status - Position fixed relative to header */}
-        <div className="login-status-container">
+        {/* Login Button - Top layer */}
+        <div className="login-status-container" style={{ zIndex: 3 }}>
           {isLoggedIn ? (
             <button onClick={handleLogout} className="login-button">Logout ({loggedInUser.username})</button>
           ) : (
