@@ -78,20 +78,25 @@ router.post(
     "/settings",
     verifyToken,
     requireAdmin,
-    upload.fields([
-        { name: "companyLogoFile", maxCount: 1 },
-        { name: "deliveryImageFile", maxCount: 1 },
-        { name: "bannerFiles", maxCount: 20 },
-        { name: "headerBackgroundFile", maxCount: 1 },
-        { name: "advertisementVideoFile", maxCount: 1 },
-    ]),
+    upload.any(),
     async (req, res) => {
         try {
-            const companyLogoFile = req.files?.companyLogoFile?.[0];
-            const deliveryImageFile = req.files?.deliveryImageFile?.[0];
-            const headerBackgroundFile = req.files?.headerBackgroundFile?.[0];
-            const bannerFiles = req.files?.bannerFiles || [];
-            const advertisementVideoFile = req.files?.advertisementVideoFile?.[0];
+            // Handle files sent with any name (companyLogoFile, deliveryImageFile, etc.)
+            const filesByName = {};
+            if (req.files) {
+                req.files.forEach(file => {
+                    if (!filesByName[file.fieldname]) {
+                        filesByName[file.fieldname] = [];
+                    }
+                    filesByName[file.fieldname].push(file);
+                });
+            }
+
+            const companyLogoFile = filesByName.companyLogoFile?.[0];
+            const deliveryImageFile = filesByName.deliveryImageFile?.[0];
+            const headerBackgroundFile = filesByName.headerBackgroundFile?.[0];
+            const bannerFiles = filesByName.bannerFiles || [];
+            const advertisementVideoFile = filesByName.advertisementVideoFile?.[0];
 
             let { header_title, company_logo_url, delivery_image_url, banners, whatsapp_number, header_bg_color } =
                 req.body;
